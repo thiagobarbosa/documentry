@@ -43,15 +43,15 @@ program
   .name('nextjs-openapi-generator')
   .description('Generate OpenAPI specs from Next.js API routes')
   .option('-d, --dir <directory>', 'Directory containing API routes', './app/api')
-  .option('-o, --output <file>', 'Output file for OpenAPI specs', './openapi.json')
-  .option('-y, --yaml', 'Output as YAML instead of JSON')
+  .option('-o, --output <file>', 'Output file for OpenAPI specs', './openapi.yaml')
+  .option('-j, --json', 'Output as JSON instead of YAML')
   .option('-v, --verbose', 'Verbose output')
   .parse(process.argv)
 
 const options = program.opts()
 const apiDir = path.resolve(process.cwd(), options.dir)
 const outputFile = path.resolve(process.cwd(), options.output)
-const outputExt = options.yaml ? 'yaml' : 'json'
+const outputExt = options.json ? 'json' : 'yaml'
 const verbose = options.verbose
 
 // Main function to generate OpenAPI specs
@@ -87,10 +87,10 @@ async function generateOpenAPISpecs() {
 
     // Write OpenAPI spec to file
     const outputPath = `${outputFile.replace(/\.\w+$/, '')}.${outputExt}`
-    if (outputExt === 'yaml') {
-      fs.writeFileSync(outputPath, yaml.dump(baseOpenAPISpec))
-    } else {
+    if (outputExt === 'json') {
       fs.writeFileSync(outputPath, JSON.stringify(baseOpenAPISpec, null, 2))
+    } else {
+      fs.writeFileSync(outputPath, yaml.dump(baseOpenAPISpec))
     }
 
     console.log(`OpenAPI specs generated at ${outputPath}`)
@@ -223,7 +223,7 @@ function extractOperationObject(node: ts.Node, httpMethod: string): OperationObj
     const docComment = extractDocComment(node)
     if (docComment) {
       // Use docstring for description
-      operation.summary = docComment
+      operation.description = docComment
     }
 
     // Try to extract request body schema for POST, PUT, PATCH
