@@ -1,6 +1,6 @@
 {
   "name": "documentry",
-  "description": "Automatically generate OpenAPI specs from Next.js API routes using LLM models.",
+  "description": "AI-powered OpenAPI documentation generator for Next.js applications.",
   "version": "0.0.1",
   "type": "module",
   "main": "dist/index.js",
@@ -15,12 +15,16 @@
     "dev": "tsx src/index.ts"
   },
   "keywords": [
-    "nextjs",
     "openapi",
-    "swagger",
-    "api",
     "documentation",
-    "generator"
+    "generator",
+    "typescript",
+    "nextjs",
+    "nodejs",
+    "cli",
+    "ai",
+    "anthropic",
+    "openai"
   ],
   "author": "Thiago Barbosa",
   "repository": "https://github.com/thiagobarbosa/documentry",
