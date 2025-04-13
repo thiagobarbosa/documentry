@@ -112,57 +112,21 @@ export class ClaudeService {
   }
 
   /**
-   * Builds the prompt for Claude to analyze the route implementation
+   * Builds the prompt for OpenAPI operation spec generation
    */
   private buildPrompt(route: string, methodImplementation: string): string {
     return `
-    You are analyzing a Next.js API route file to generate its OpenAPI documentation.
-    Examine this TypeScript code for the endpoint "${route}":
-    
+    You are generating the OpenAPI documentation for a Next.js API route "${route}":
+    This is the TypeScript function implementation:
+
     \`\`\`typescript
     ${methodImplementation}
     \`\`\`
     
-    Based on your analysis of the code, provide:
-    
-    1. A concise summary (max 10 words) that describes what this API endpoint does
-    2. A more expanded description (a few sentences) explaining the endpoint's purpose, parameters, and functionality. 
-    Be short and straightforward and use user-friendly language.
-    3: Parameter accepted by the endpoint and their types (ignore any Next.js specific types like NextRequest, NextResponse, etc.).
-    Make sure to analyze the body of the function to find the parameters used in the implementation.
-    For instance, if the function has a code like this:
-    \`\`\`typescript
-    export async function GET(request: NextRequest) {
-      const { searchParams } = new URL(request.url)
-      const id = searchParams.get('id')"
-      if (!id) throw new Error('id not provided')
-      
-      (... rest of the code ...)
-    }
-    \`\`\`
-    Then 'id' is a query parameter of type string required by the endpoint.
-    
-    And a code like this:
-    \`\`\`typescript
-    export async function GET(
-      request: NextRequest,
-      { params }: { params: { id: string } }) 
+    Return valid JSON only in this format:
     {
-      (.. rest of the code ...)
-    }
-    \`\`\`
-    
-    Then 'id' is a path parameter of type string required by the endpoint.
-    
-    Also, keep in mind that some path parameters might not appear on the function signature, 
-    but on the route path itself. For instance, if the route is '/hotel/{id}/another-thing', 
-    then 'id' is a path parameter of type string required by the endpoint regardless of whether 
-    it appears on the function signature or not.
-    
-    Your response should be in the following JSON format:
-    {
-      "summary": "Short endpoint summary",
-      "description": "Expanded endpoint description",
+      "summary": "Concise endpoint purpose (max 10 words)",
+      "description": "Brief explanation of functionality, parameters, and purpose",
       "parameters": [
         {
           "name": "parameterName",
@@ -170,13 +134,19 @@ export class ClaudeService {
           "required": true|false,
           "schema": {
             "type": "string|number|boolean|array|object|null",
-            "nullable": true|false,
+            "nullable": true|false
           }
         }
       ]
     }
     
-    Only return valid JSON. Do not include any other explanatory text.`
+    Follow these rules:
+    1. Ignore Next.js types (NextRequest, NextResponse)
+    2. Analyze function body for used parameters
+    3. Query parameters: Extracted from URL/searchParams (e.g., searchParams.get('id'))
+    4. Path parameters: Found in function signature ({params: {id: string}}) or route path (e.g., '/hotel/{id}/...')
+    5. Body parameters: Parsed from request body (e.g., await request.json())
+    6. Check if parameters are required or optional`
   }
 
   /**
