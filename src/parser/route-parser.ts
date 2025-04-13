@@ -38,7 +38,6 @@ export function parseRouteFile(
       node.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)) {
       const name = node.name?.text.toLowerCase() || ''
       if (HTTP_METHODS.includes(name)) {
-        if (verbose) console.log(`Found HTTP method function: ${name}`)
         routeDefinitions[name] = extractOperationObject(node, name, verbose)
       }
     }

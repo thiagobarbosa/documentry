@@ -21,9 +21,9 @@ export class ClaudeService {
   /**
    * Analyzes a route.ts file using Claude to generate OpenAPI documentation
    */
-  public async analyzeRouteFile(filePath: string, httpMethod: string): Promise<EndpointAnalysis> {
+  public async analyzeRouteFile(filePath: string, httpMethod: string, route: string): Promise<EndpointAnalysis> {
     if (this.verbose) {
-      console.log(`Analyzing ${filePath} for ${httpMethod.toUpperCase()} method with Claude...`)
+      console.log(`Analyzing "${route}" method with Claude...`)
     }
 
     try {
@@ -34,10 +34,10 @@ export class ClaudeService {
 
       if (!methodImplementation) {
         if (this.verbose) {
-          console.log(`Could not find implementation for ${httpMethod.toUpperCase()} method in ${filePath}`)
+          console.log(`Could not find implementation for ${route} method in file: ${filePath}`)
         }
         return {
-          summary: `${httpMethod.toUpperCase()} endpoint`,
+          summary: `${route} endpoint`,
           description: 'No detailed description available',
         }
       }
@@ -46,6 +46,7 @@ export class ClaudeService {
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: 1000,
+        top_p: 0.8,
         messages: [
           {
             role: 'user',
@@ -60,7 +61,7 @@ export class ClaudeService {
     } catch (error) {
       console.error(`Error analyzing route file with Claude:`, error)
       return {
-        summary: `${httpMethod.toUpperCase()} endpoint`,
+        summary: `${route} endpoint`,
         description: 'Failed to generate description with Claude',
       }
     }

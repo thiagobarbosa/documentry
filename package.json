@@ -1,7 +1,7 @@
 {
-  "name": "nextjs-openapi-generator",
-  "version": "1.0.0",
-  "description": "Automatically generate OpenAPI specs from Next.js API routes",
+  "name": "nextjs-genspec-test",
+  "description": "Automatically generate OpenAPI specs from Next.js API routes using LLM models.",
+  "version": "0.0.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

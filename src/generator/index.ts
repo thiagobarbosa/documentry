@@ -39,7 +39,6 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
         console.warn('Claude enhancement enabled but no API key provided. Please set ANTHROPIC_API_KEY environment variable or use --anthropic-key.')
         console.warn('Continuing without Claude enhancement...')
       } else {
-        console.log('Initializing Claude for API documentation enhancement...')
         claudeService = new ClaudeService(anthropicKey, verbose)
       }
     }
@@ -47,18 +46,17 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     // Process each route file
     for (const routeFile of routeFiles) {
       const fullPath = path.join(dir, routeFile)
-      if (verbose) console.log(`Processing ${fullPath}`)
 
       // Get API path from file path
       const apiPath = getAPIPathFromFilePath(routeFile)
-      if (verbose) console.log(`API Path: ${apiPath}`)
+      if (verbose) console.log(`Processing ${apiPath}`)
 
       // Parse route file
       const routeDefinitions = parseRouteFile(fullPath, verbose)
 
       // Enhance with Claude if available
       if (claudeService) {
-        await enhanceWithClaude(fullPath, routeDefinitions, claudeService, verbose)
+        await enhanceWithClaude(fullPath, routeDefinitions, claudeService, apiPath, verbose)
       }
 
       // Add to OpenAPI spec
@@ -75,7 +73,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
       fs.writeFileSync(outputPath, JSON.stringify(openAPISpec, null, 2))
     }
 
-    console.log(`OpenAPI specs generated at ${outputPath}`)
+    console.log(`SUCCESS! OpenAPI specs generated at ${outputPath}`)
   } catch (error) {
     console.error('Error generating OpenAPI specs:', error)
     throw error
