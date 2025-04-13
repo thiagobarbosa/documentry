@@ -23,7 +23,11 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
 
   assert(format === 'yaml' || format === 'json', 'Invalid format. Available formats: "yaml" | "json"')
 
-  console.log('> Starting OpenAPI spec generation\n', { provider, model: model || getDefaultModel(provider), format }, '\n')
+  console.log('> Starting OpenAPI spec generation\n', {
+    provider,
+    model: model || getDefaultModel(provider),
+    format
+  }, '\n')
 
   const outputPath = `${outputFile}.${format}`
   let errorCount = 0
@@ -104,6 +108,12 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     if (errorCount === routeFiles.length) {
       console.error('Failed to generate OpenAPI specs. Please check the logs for details.')
       return
+    }
+
+    // If outputPath contains a directory, create it if it doesn't exist
+    const outputDir = path.dirname(outputPath)
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true })
     }
 
     // Write OpenAPI spec to file

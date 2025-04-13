@@ -12,7 +12,7 @@ export function initCli(): CliOptions {
     .name('documentry')
     .description('Automatically generate OpenAPI specs from Next.js API routes using LLM models.')
     .option('--dir <directory>', 'Directory containing API routes', './app/api')
-    .option('-o, --output-file <file>', 'Output file for OpenAPI specs', './openapi')
+    .option('-o, --output-file <file>', 'Output file for OpenAPI specs', 'openapi')
     .option('-f, --format <format>', 'Output format (yaml or json)', 'yaml')
     .option('--verbose', 'Verbose output')
 
