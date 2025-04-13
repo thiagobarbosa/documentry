@@ -2,7 +2,7 @@ import { OperationObject } from 'openapi3-ts/oas30'
 import { ClaudeService } from '@/services/claude'
 
 /**
- * Enhance OpenAPI operations with Claude analysis
+ * Generates OpenAPI values for a given route file using Claude.
  *
  * @param filePath - Path to the route file
  * @param routeDefinitions - Map of HTTP methods to OpenAPI operations
@@ -11,7 +11,7 @@ import { ClaudeService } from '@/services/claude'
  * @param verbose - Whether to log verbose output
  * @param routeIndex - Index of the route file in the list of files
  */
-export async function enhanceWithClaude(
+export async function generateOpenAPIValues(
   filePath: string,
   routeDefinitions: Record<string, OperationObject>,
   claudeService: ClaudeService,

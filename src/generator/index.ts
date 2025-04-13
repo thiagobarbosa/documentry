@@ -5,7 +5,7 @@ import yaml from 'js-yaml'
 import { OpenAPIObject, OperationObject } from 'openapi3-ts/oas30'
 import { BASE_OPENAPI_SPEC, CliOptions } from '@/types'
 import { getAPIPathFromFilePath, parseRouteFile } from '@/parser'
-import { enhanceWithClaude } from './enhancement'
+import { generateOpenAPIValues } from './generate-values'
 import { ClaudeService } from '@/services/claude'
 
 /**
@@ -56,7 +56,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
 
       // Enhance with Claude if available
       if (claudeService) {
-        await enhanceWithClaude(fullPath, routeDefinitions, claudeService, apiPath, verbose, routeIndex)
+        await generateOpenAPIValues(fullPath, routeDefinitions, claudeService, apiPath, verbose, routeIndex)
       }
 
       // Add to OpenAPI spec
