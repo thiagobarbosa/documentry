@@ -2,16 +2,17 @@
   "name": "nextjs-openapi-generator",
   "version": "1.0.0",
   "description": "Automatically generate OpenAPI specs from Next.js API routes",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "nextjs-openapi-generator": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "dev": "tsx src/index.ts",
     "test": "jest"
   },
   "keywords": [
@@ -39,7 +40,9 @@
     "@types/node": "^20.17.30",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.1",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "tsup": "^8.4.0",
+    "tsx": "^4.7.1"
   },
   "files": [
     "dist",

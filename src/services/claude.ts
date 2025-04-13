@@ -1,5 +1,3 @@
-// src/claude.ts
-
 import { Anthropic } from '@anthropic-ai/sdk'
 import fs from 'fs'
 
