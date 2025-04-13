@@ -1,13 +1,13 @@
 import { Anthropic } from '@anthropic-ai/sdk'
 import fs from 'fs'
-import { ParameterObject, ReferenceObject } from 'openapi3-ts/oas30'
+import { GeneratedAPIOperation } from '@/types'
 
-interface EndpointAnalysis {
-  summary: string;
-  description: string;
-  parameters?: (ParameterObject | ReferenceObject)[]
-}
-
+/**
+ * Claude service for generating OpenAPI operation details
+ * using the Anthropic API.
+ *
+ * @class ClaudeService
+ */
 export class ClaudeService {
   private client: Anthropic
   private readonly model = 'claude-3-5-sonnet-latest'
@@ -21,9 +21,9 @@ export class ClaudeService {
   }
 
   /**
-   * Analyzes a route.ts file using Claude to generate OpenAPI documentation
+   * Generates OpenAPI operation details using Claude
    */
-  public async analyzeRouteFile(filePath: string, httpMethod: string, route: string): Promise<EndpointAnalysis> {
+  public async generateOperation(filePath: string, httpMethod: string, route: string): Promise<GeneratedAPIOperation> {
     if (this.verbose) {
       console.log(`Analyzing "${route}" method with Claude...`)
     }
@@ -180,16 +180,16 @@ export class ClaudeService {
   }
 
   /**
-   * Parses Claude's response into the EndpointAnalysis structure
+   * Parses Claude's response into the GeneratedAPIOperation structure
    */
-  private parseClaudeResponse(responseText: string): EndpointAnalysis {
+  private parseClaudeResponse(responseText: string): GeneratedAPIOperation {
     try {
       // Extract JSON if it's wrapped in code blocks or has extra text
       const jsonMatch = responseText.match(/```(?:json)?\s*({[\s\S]*?})\s*```/) ||
         responseText.match(/({[\s\S]*})/)
 
       const jsonText = jsonMatch ? jsonMatch[1] : responseText
-      const parsed = JSON.parse(jsonText) as EndpointAnalysis
+      const parsed = JSON.parse(jsonText) as GeneratedAPIOperation
 
       return {
         summary: parsed.summary || 'API endpoint',

@@ -25,12 +25,12 @@ export async function generateOpenAPIValues(
     const route = `${method.toUpperCase()} ${apiPath}`
     try {
       console.log(`[${routeIndex + 1}] Analyzing method "${route}"`)
-      const analysis = await claudeService.analyzeRouteFile(filePath, method, route)
+      const updatedOperation = await claudeService.generateOperation(filePath, method, route)
 
       // Apply Claude's enhancements to the operation
-      operation.summary = analysis.summary
-      operation.description = analysis.description
-      operation.parameters = analysis.parameters
+      operation.summary = updatedOperation.summary
+      operation.description = updatedOperation.description
+      operation.parameters = updatedOperation.parameters
 
       if (verbose) console.log(`[${routeIndex + 1}] "${route}" documentation enhanced with Claude.`)
     } catch (error) {

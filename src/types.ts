@@ -1,4 +1,4 @@
-import { OpenAPIObject } from 'openapi3-ts/oas30'
+import { OpenAPIObject, ParameterObject, ReferenceObject } from 'openapi3-ts/oas30'
 
 // CLI options
 export interface CliOptions {
@@ -12,9 +12,10 @@ export interface CliOptions {
 }
 
 // Claude analysis result
-export interface ClaudeAnalysis {
-  summary: string
-  description: string
+export interface GeneratedAPIOperation {
+  summary: string;
+  description: string;
+  parameters?: (ParameterObject | ReferenceObject)[]
 }
 
 // HTTP methods supported in Next.js API routes
