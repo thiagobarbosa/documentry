@@ -41,7 +41,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
         console.warn('Claude enhancement enabled but no API key provided. Please set ANTHROPIC_API_KEY environment variable or use --anthropic-key.')
         console.warn('Continuing without Claude enhancement...')
       } else {
-        anthropicService = new AnthropicService(anthropicKey, 'claude-3-5-sonnet-latest', verbose)
+        anthropicService = new AnthropicService(anthropicKey, process.env.ANTHROPIC_API_MODEL, verbose)
       }
     }
 
