@@ -1,12 +1,12 @@
 {
-  "name": "nextjs-genspec-test",
+  "name": "documentry",
   "description": "Automatically generate OpenAPI specs from Next.js API routes using LLM models.",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "nextjs-openapi-generator": "dist/index.js"
+    "documentry": "dist/index.js"
   },
   "scripts": {
     "build": "tsup",
@@ -22,7 +22,8 @@
     "documentation",
     "generator"
   ],
-  "author": "",
+  "author": "Thiago Barbosa",
+  "repository": "https://github.com/thiagobarbosa/documentry",
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.19.0",

@@ -4,10 +4,9 @@ import { AVAILABLE_LLM_PROVIDERS } from '@/services/providers/llm-provider'
 // CLI options
 export interface CliOptions {
   dir: string
-  output: string
-  json: boolean
-  yaml: boolean
-  verbose: boolean
+  outputFile: string
+  format: 'yaml' | 'json'
+  verbose?: boolean
   provider: typeof AVAILABLE_LLM_PROVIDERS[number]
   model: string
   apiKey: string
