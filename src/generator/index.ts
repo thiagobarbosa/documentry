@@ -50,7 +50,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     const llmService = createLLMService(provider, apiKey, model, verbose)
 
     // Process each route file
-    for (const routeFile of routeFiles) {
+    for (const [routeIndex, routeFile] of routeFiles.entries()) {
       const fullPath = path.join(dir, routeFile)
 
       // Get API path from file path
@@ -69,7 +69,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
         openAPISpec.paths[apiPath] = {}
       }
 
-      console.log('\n> Processing file:', { path: apiPath, methods: httpMethods })
+      console.log('\n> File', routeIndex + 1, '\n', { path: apiPath, numberOfMethods: httpMethods.length })
 
       // Process each HTTP method
       for (const method of httpMethods) {
