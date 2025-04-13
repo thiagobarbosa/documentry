@@ -16,8 +16,11 @@
   },
   "keywords": [
     "openapi",
+    "api",
     "documentation",
+    "docs",
     "generator",
+    "swagger",
     "typescript",
     "nextjs",
     "nodejs",
