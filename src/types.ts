@@ -10,6 +10,11 @@ export interface CliOptions {
   provider: string
   model: string
   apiKey: string
+  info?: {
+    title: string
+    version: string
+    description: string
+  }
 }
 
 // Claude analysis result

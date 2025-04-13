@@ -14,7 +14,7 @@ import { convertRouteToPath, getHTTPMethodsFromFile } from '@/parsers'
  * @param options - CLI options
  */
 export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
-  const { dir, output, json: useJson, yaml: useYaml, verbose, provider, model, apiKey } = options
+  const { dir, output, json: useJson, yaml: useYaml, verbose, provider, model, apiKey, info } = options
 
   assert(provider === 'anthropic', 'Only "anthropic" provider is supported at this time.')
   assert(apiKey, 'API key is required. Please set the LLM_PROVIDER_API_KEY environment variable or use --api-key option.')
@@ -28,7 +28,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     const routeFiles = await glob('**/route.ts', { cwd: dir })
 
     if (routeFiles.length === 0) {
-      console.log('No route.ts files found.')
+      console.log(`No route.ts files found in directory "${dir}".`)
       return
     }
 
@@ -36,6 +36,11 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
 
     // Create a deep copy of the base spec to avoid modifying the original
     const openAPISpec: OpenAPIObject = JSON.parse(JSON.stringify(BASE_OPENAPI_SPEC))
+    openAPISpec.info = {
+      title: info?.title || openAPISpec.info.title,
+      version: info?.version || openAPISpec.info.version,
+      description: info?.description || openAPISpec.info.description
+    }
 
     // Initialize Anthropic service
     const anthropicService = new AnthropicService(apiKey, model, verbose)

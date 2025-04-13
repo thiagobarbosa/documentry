@@ -11,11 +11,18 @@ export function initCli(): CliOptions {
   program
     .name('nextjs-openapi-generator')
     .description('Automatically generate OpenAPI specs from Next.js API routes using LLM models.')
-    .option('-d, --dir <directory>', 'Directory containing API routes', './app/api')
+    .option('--dir <directory>', 'Directory containing API routes', './app/api')
     .option('-o, --output <file>', 'Output file for OpenAPI specs', './openapi.json')
     .option('-j, --json', 'Output as JSON instead of YAML')
     .option('-y, --yaml', 'Output as YAML instead of JSON')
-    .option('-v, --verbose', 'Verbose output')
+    .option('--verbose', 'Verbose output')
+
+    // OpenAPI spec options
+    .option('-t, --title <title>', 'Title for the OpenAPI spec')
+    .option('-d, --description <description>', 'Description for the OpenAPI spec')
+    .option('-v, --version <version>', 'Version for the OpenAPI spec')
+
+    // LLM provider options
     .option('-p, --provider <provider>', 'LLM provider (e.g., anthropic)', process.env.LLM_PROVIDER || 'anthropic')
     .option('-m, --model <model>', 'LLM model (e.g., claude-3-5-sonnet-latest)', process.env.LLM_MODEL || 'claude-3-5-sonnet-latest')
     .option('-k, --api-key <key>', 'LLM provider API key', process.env.LLM_PROVIDER_API_KEY)
@@ -31,7 +38,12 @@ export function initCli(): CliOptions {
     verbose: options.verbose,
     provider: options.provider,
     model: options.model,
-    apiKey: options.apiKey
+    apiKey: options.apiKey,
+    info: {
+      title: options.title,
+      version: options.version,
+      description: options.description
+    }
   }
 }
 
