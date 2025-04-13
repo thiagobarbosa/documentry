@@ -9,29 +9,31 @@ import { ClaudeService } from '@/services/claude'
  * @param claudeService - Claude service instance
  * @param apiPath - API path (e.g. '/users/{id}')
  * @param verbose - Whether to log verbose output
+ * @param routeIndex - Index of the route file in the list of files
  */
 export async function enhanceWithClaude(
   filePath: string,
   routeDefinitions: Record<string, OperationObject>,
   claudeService: ClaudeService,
   apiPath: string,
-  verbose = false
+  verbose = false,
+  routeIndex: number = 0
 ): Promise<void> {
-  if (verbose) console.log(`Enhancing API docs with Claude for ${filePath}...`)
+  if (verbose) console.log(`[${routeIndex + 1}] Enhancing API docs with Claude for ${filePath}...`)
 
   for (const [method, operation] of Object.entries(routeDefinitions)) {
     const route = `${method.toUpperCase()} ${apiPath}`
     try {
-      console.log(`Analyzing method "${route}"`)
+      console.log(`[${routeIndex + 1}] Analyzing method "${route}"`)
       const analysis = await claudeService.analyzeRouteFile(filePath, method, route)
 
       // Apply Claude's enhancements to the operation
       operation.summary = analysis.summary
       operation.description = analysis.description
 
-      if (verbose) console.log(`"${route}" documentation enhanced with Claude.`)
+      if (verbose) console.log(`[${routeIndex + 1}] "${route}" documentation enhanced with Claude.`)
     } catch (error) {
-      console.error(`Error enhancing "${route}" documentation with Claude:`, error)
+      console.error(`[${routeIndex + 1}] Error enhancing "${route}" documentation with Claude:`, error)
     }
   }
 }

@@ -15,7 +15,7 @@ export function initCli(): CliOptions {
     .option('-j, --json', 'Output as JSON instead of YAML')
     .option('-y, --yaml', 'Output as YAML instead of JSON')
     .option('-v, --verbose', 'Verbose output')
-    .option('-c, --claude', 'Use Claude to enhance API documentation')
+    .option('-l, --llm <model>', 'Use LLM for analysis (e.g., anthropic)')
     .option('-a, --anthropic-key <key>', 'Anthropic API key (can also use ANTHROPIC_API_KEY env var)')
     .parse(process.argv)
 
@@ -27,8 +27,8 @@ export function initCli(): CliOptions {
     json: options.json,
     yaml: options.yaml,
     verbose: options.verbose,
-    claude: options.claude || true,
-    anthropicKey: options.anthropicKey || process.env.ANTHROPIC_API_KEY
+    llm: options.llm,
+    anthropicKey: options.anthropicKey
   }
 }
 

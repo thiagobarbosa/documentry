@@ -7,7 +7,7 @@ export interface CliOptions {
   json: boolean
   yaml: boolean
   verbose: boolean
-  claude: boolean
+  llm?: string
   anthropicKey?: string
 }
 

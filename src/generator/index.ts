@@ -14,9 +14,7 @@ import { ClaudeService } from '@/services/claude'
  * @param options - CLI options
  */
 export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
-  const { dir, output, json, yaml: useYaml, verbose, claude: useClaudeEnhancement, anthropicKey } = options
-
-  console.log(`Scanning API routes in ${dir}...`)
+  const { dir, output, json, yaml: useYaml, verbose, llm, anthropicKey } = options
 
   try {
     // Find all route.ts files
@@ -33,8 +31,9 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     const openAPISpec: OpenAPIObject = JSON.parse(JSON.stringify(BASE_OPENAPI_SPEC))
 
     // Initialize Claude service if enhancement is enabled
+    // Currently only supports Claude
     let claudeService: ClaudeService | null = null
-    if (useClaudeEnhancement) {
+    if (llm === 'anthropic') {
       if (!anthropicKey) {
         console.warn('Claude enhancement enabled but no API key provided. Please set ANTHROPIC_API_KEY environment variable or use --anthropic-key.')
         console.warn('Continuing without Claude enhancement...')
@@ -44,19 +43,20 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     }
 
     // Process each route file
-    for (const routeFile of routeFiles) {
+    // for loop with index
+    for (const [routeIndex, routeFile] of routeFiles.entries()) {
       const fullPath = path.join(dir, routeFile)
 
       // Get API path from file path
       const apiPath = getAPIPathFromFilePath(routeFile)
-      if (verbose) console.log(`Processing ${apiPath}`)
+      if (verbose) console.log(`[${routeIndex + 1}] Processing ${apiPath}`)
 
       // Parse route file
       const routeDefinitions = parseRouteFile(fullPath, verbose)
 
       // Enhance with Claude if available
       if (claudeService) {
-        await enhanceWithClaude(fullPath, routeDefinitions, claudeService, apiPath, verbose)
+        await enhanceWithClaude(fullPath, routeDefinitions, claudeService, apiPath, verbose, routeIndex)
       }
 
       // Add to OpenAPI spec
