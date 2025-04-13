@@ -6,7 +6,7 @@ import { OpenAPIObject, OperationObject } from 'openapi3-ts/oas30'
 import { BASE_OPENAPI_SPEC, CliOptions } from '@/types'
 import { getAPIPathFromFilePath, parseRouteFile } from '@/parser'
 import { generateOpenAPIValues } from './generate-values'
-import { ClaudeService } from '@/services/claude'
+import { AnthropicService } from '@/services/providers/anthropic'
 
 /**
  * Generate OpenAPI specifications from Next.js API routes
@@ -15,6 +15,9 @@ import { ClaudeService } from '@/services/claude'
  */
 export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
   const { dir, output, json, yaml: useYaml, verbose, llm, anthropicKey } = options
+  const outputExt = useYaml ? 'yaml' : (json ? 'json' : 'yaml')
+  const outputPath = `${output.replace(/\.\w+$/, '')}.${outputExt}`
+  let errorCount = 0
 
   try {
     // Find all route.ts files
@@ -32,13 +35,13 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
 
     // Initialize Claude service if enhancement is enabled
     // Currently only supports Claude
-    let claudeService: ClaudeService | null = null
+    let anthropicService: AnthropicService | null = null
     if (llm === 'anthropic') {
       if (!anthropicKey) {
         console.warn('Claude enhancement enabled but no API key provided. Please set ANTHROPIC_API_KEY environment variable or use --anthropic-key.')
         console.warn('Continuing without Claude enhancement...')
       } else {
-        claudeService = new ClaudeService(anthropicKey, verbose)
+        anthropicService = new AnthropicService(anthropicKey, 'claude-3-5-sonnet-latest', verbose)
       }
     }
 
@@ -54,28 +57,40 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
       const routeDefinitions = parseRouteFile(fullPath, verbose)
 
       // Enhance with Claude if available
-      if (claudeService) {
-        await generateOpenAPIValues(fullPath, routeDefinitions, claudeService, apiPath, verbose, routeIndex)
+      if (anthropicService) {
+        try {
+          await generateOpenAPIValues(fullPath, routeDefinitions, anthropicService, apiPath, verbose, routeIndex)
+        } catch (error: any) {
+          console.error(`Error processing "${apiPath}" with Claude:`, error.message)
+          errorCount++
+          continue // Skip this route if enhancement fails
+        }
       }
 
       // Add to OpenAPI spec
       addRouteToOpenAPISpec(apiPath, routeDefinitions, openAPISpec, verbose)
     }
 
-    // Write OpenAPI spec to file
-    const outputExt = useYaml ? 'yaml' : (json ? 'json' : 'yaml')
-    const outputPath = `${output.replace(/\.\w+$/, '')}.${outputExt}`
+    if (errorCount === routeFiles.length) {
+      console.error('\nFailed to generate OpenAPI specs. Please check the logs for details.')
+      return
+    }
 
+    // Write OpenAPI spec to file
     if (outputExt === 'yaml') {
       fs.writeFileSync(outputPath, yaml.dump(openAPISpec))
     } else {
       fs.writeFileSync(outputPath, JSON.stringify(openAPISpec, null, 2))
     }
 
-    console.log(`SUCCESS! OpenAPI specs generated at ${outputPath}`)
-  } catch (error) {
-    console.error('Error generating OpenAPI specs:', error)
-    throw error
+    if (errorCount > 0) {
+      console.error('\nFailed to generate OpenAPI specs for', errorCount, 'route(s). ' +
+        'Please check the logs for details since the OpenAPI spec may be incomplete.')
+    } else {
+      console.log(`\nSUCCESS! OpenAPI specs generated at ${outputPath}`)
+    }
+  } catch (error: any) {
+    throw new Error(`Error generating OpenAPI specs: ${error.message}`)
   }
 }
 

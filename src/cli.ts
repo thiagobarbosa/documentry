@@ -40,8 +40,8 @@ export async function runCli(): Promise<void> {
 
   try {
     await generateOpenAPISpecs(options)
-  } catch (error) {
-    console.error('Error generating OpenAPI specs:', error)
+  } catch (error: any) {
+    console.error(error.message)
     process.exit(1)
   }
 }

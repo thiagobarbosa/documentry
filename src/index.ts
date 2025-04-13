@@ -1,6 +1,6 @@
 import { runCli } from './cli'
 import { generateOpenAPISpecs } from './generator'
-import { ClaudeService } from './services/claude'
+import { AnthropicService } from '@/services/providers/anthropic'
 
 /* The simplest approach for a CLI tool in ESM:
  Check if this module is being executed directly by examining how Node was invoked
@@ -17,5 +17,5 @@ if (isCli) {
 // Export public API for programmatic usage
 export {
   generateOpenAPISpecs,
-  ClaudeService
+  AnthropicService
 }
