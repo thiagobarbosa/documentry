@@ -138,5 +138,3 @@ Running the generator will create an OpenAPI specification that includes:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-```
