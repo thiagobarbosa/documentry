@@ -23,8 +23,8 @@ export function initCli(): CliOptions {
     .option('-v, --version <version>', 'Version for the OpenAPI spec')
 
     // LLM provider options
-    .option('-p, --provider <provider>', 'LLM provider (e.g., anthropic)', process.env.LLM_PROVIDER || 'anthropic')
-    .option('-m, --model <model>', 'LLM model (e.g., claude-3-5-sonnet-latest)', process.env.LLM_MODEL || 'claude-3-5-sonnet-latest')
+    .option('-p, --provider <provider>', 'LLM provider (e.g., anthropic, openai)', process.env.LLM_PROVIDER)
+    .option('-m, --model <model>', 'LLM model (e.g., claude-3-5-sonnet-latest)', process.env.LLM_MODEL)
     .option('-k, --api-key <key>', 'LLM provider API key', process.env.LLM_PROVIDER_API_KEY)
     .parse(process.argv)
 

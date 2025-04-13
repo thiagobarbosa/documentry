@@ -1,7 +1,7 @@
 {
   "name": "nextjs-genspec-test",
   "description": "Automatically generate OpenAPI specs from Next.js API routes using LLM models.",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,6 +30,7 @@
     "commander": "^11.1.0",
     "glob": "^10.4.5",
     "js-yaml": "^4.1.0",
+    "openai": "^4.93.0",
     "openapi3-ts": "^4.4.0",
     "typescript": "^5.8.3"
   },

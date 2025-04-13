@@ -1,4 +1,5 @@
 import { OpenAPIObject, ParameterObject, ReferenceObject, RequestBodyObject } from 'openapi3-ts/oas30'
+import { AVAILABLE_LLM_PROVIDERS } from '@/services/providers/llm-provider'
 
 // CLI options
 export interface CliOptions {
@@ -7,7 +8,7 @@ export interface CliOptions {
   json: boolean
   yaml: boolean
   verbose: boolean
-  provider: string
+  provider: typeof AVAILABLE_LLM_PROVIDERS[number]
   model: string
   apiKey: string
   info?: {

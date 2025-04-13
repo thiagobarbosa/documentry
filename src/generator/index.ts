@@ -5,8 +5,8 @@ import { glob } from 'glob'
 import yaml from 'js-yaml'
 import { OpenAPIObject } from 'openapi3-ts/oas30'
 import { BASE_OPENAPI_SPEC, CliOptions } from '@/types'
-import { AnthropicService } from '@/services/providers/anthropic'
 import { convertRouteToPath, getHTTPMethodsFromFile } from '@/parsers'
+import { AVAILABLE_LLM_PROVIDERS, createLLMService, getDefaultModel } from '@/services/providers/llm-provider'
 
 /**
  * Generate OpenAPI specifications from Next.js API routes
@@ -16,8 +16,12 @@ import { convertRouteToPath, getHTTPMethodsFromFile } from '@/parsers'
 export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
   const { dir, output, json: useJson, yaml: useYaml, verbose, provider, model, apiKey, info } = options
 
-  assert(provider === 'anthropic', 'Only "anthropic" provider is supported at this time.')
+  assert(AVAILABLE_LLM_PROVIDERS.includes(provider as any),
+    `Invalid provider "${provider}". Available providers: "${AVAILABLE_LLM_PROVIDERS.join(' | ')}"`)
+
   assert(apiKey, 'API key is required. Please set the LLM_PROVIDER_API_KEY environment variable or use --api-key option.')
+
+  console.log('> Starting OpenAPI spect generation\n', { provider, model: model || getDefaultModel(provider) }, '\n')
 
   const outputExt = useYaml ? 'yaml' : useJson ? 'json' : 'yaml'
   const outputPath = `${output.replace(/\.\w+$/, '')}.${outputExt}`
@@ -32,7 +36,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
       return
     }
 
-    console.log(`Found ${routeFiles.length} route files.`)
+    console.log('✓ Found', routeFiles.length, routeFiles.length > 1 ? 'routes' : 'route')
 
     // Create a deep copy of the base spec to avoid modifying the original
     const openAPISpec: OpenAPIObject = JSON.parse(JSON.stringify(BASE_OPENAPI_SPEC))
@@ -42,11 +46,11 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
       description: info?.description || openAPISpec.info.description
     }
 
-    // Initialize Anthropic service
-    const anthropicService = new AnthropicService(apiKey, model, verbose)
+    // Initialize LLM service
+    const llmService = createLLMService(provider, apiKey, model, verbose)
 
     // Process each route file
-    for (const [routeIndex, routeFile] of routeFiles.entries()) {
+    for (const routeFile of routeFiles) {
       const fullPath = path.join(dir, routeFile)
 
       // Get API path from file path
@@ -65,12 +69,15 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
         openAPISpec.paths[apiPath] = {}
       }
 
+      console.log('\n> Processing file:', { path: apiPath, methods: httpMethods })
+
       // Process each HTTP method
       for (const method of httpMethods) {
         const route = `${method.toUpperCase()} ${apiPath}`
         try {
-          console.log(`[${routeIndex + 1}] Analyzing method "${route}"`)
-          const operation = await anthropicService.generateOperation(fullPath, method, route)
+          console.log('Generating specs for', { route: `${method.toUpperCase()} ${apiPath}` })
+
+          const operation = await llmService.generateOperation(fullPath, method, route)
 
           // Add to OpenAPI spec
           openAPISpec.paths[apiPath][method as any] = {
@@ -85,7 +92,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
             }
           }
 
-          if (verbose) console.log(`[${routeIndex + 1}] "${route}" successfully generated`)
+          if (verbose) console.log(`"${route}" successfully generated`)
         } catch (error: any) {
           console.error(`Error processing "${route}" with ${provider}:`, error.message, '\n')
           errorCount++
@@ -105,11 +112,14 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
       fs.writeFileSync(outputPath, JSON.stringify(openAPISpec, null, 2))
     }
 
+    // TODO: implement some console-styling library (e.g., chalk)
     if (errorCount > 0) {
-      console.error('Failed to generate OpenAPI specs for', errorCount, 'route(s). ' +
+      console.error('\x1b[31m✗\x1b[0m Failed to generate OpenAPI specs for', errorCount, 'route(s). ' +
         'Please check the logs for details since the OpenAPI spec may be incomplete.')
     } else {
-      console.log('\nSUCCESS! OpenAPI specs generated at ', outputPath)
+      // log success message with underline
+      console.log('\n', '\x1b[32m✓ SUCCESS!\x1b[0m', 'OpenAPI specs generated at', `\x1b[4m${outputPath}\x1b[0m`)
+
     }
   } catch (error: any) {
     throw new Error(`Error generating OpenAPI specs: ${error.message}`)
