@@ -1,4 +1,4 @@
-import { OpenAPIObject, ParameterObject, ReferenceObject } from 'openapi3-ts/oas30'
+import { OpenAPIObject, ParameterObject, ReferenceObject, RequestBodyObject } from 'openapi3-ts/oas30'
 
 // CLI options
 export interface CliOptions {
@@ -16,6 +16,7 @@ export interface CliOptions {
 export interface GeneratedAPIOperation {
   summary: string;
   description: string;
+  requestBody?: RequestBodyObject | ReferenceObject
   parameters?: (ParameterObject | ReferenceObject)[]
 }
 

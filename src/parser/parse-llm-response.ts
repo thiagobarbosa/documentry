@@ -15,7 +15,8 @@ export const parseLLMResponse = (responseText: string): GeneratedAPIOperation =>
     return {
       summary: parsed.summary || 'API endpoint',
       description: parsed.description || 'No description available',
-      parameters: parsed.parameters
+      parameters: parsed.parameters,
+      requestBody: parsed.requestBody
     }
   } catch (error) {
     console.error('Error parsing Claude response:', error)

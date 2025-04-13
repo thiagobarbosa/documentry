@@ -4,7 +4,7 @@ import { glob } from 'glob'
 import yaml from 'js-yaml'
 import { OpenAPIObject, OperationObject } from 'openapi3-ts/oas30'
 import { BASE_OPENAPI_SPEC, CliOptions } from '@/types'
-import { getAPIPathFromFilePath, parseRouteFile } from '@/parser'
+import { convertRouteToPath, parseRouteFile } from '@/parser'
 import { generateOpenAPIValues } from './generate-values'
 import { AnthropicService } from '@/services/providers/anthropic'
 import assert from 'node:assert'
@@ -49,7 +49,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
       const fullPath = path.join(dir, routeFile)
 
       // Get API path from file path
-      const apiPath = getAPIPathFromFilePath(routeFile)
+      const apiPath = convertRouteToPath(routeFile)
       if (verbose) console.log(`[${routeIndex + 1}] Processing ${apiPath}`)
 
       // Parse route file

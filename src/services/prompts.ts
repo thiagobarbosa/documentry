@@ -14,6 +14,33 @@ export const buildPrompt = (route: string, methodImplementation: string): string
     {
       "summary": "Concise endpoint purpose (max 10 words)",
       "description": "Brief explanation of functionality, parameters, and purpose",
+      "requestBody": { // optional; DO NOT include if not present
+        "description": "Description of the request body",
+        "required": true|false,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "string|number|boolean|array|object|null",
+              "nullable": true|false,
+              "properties": {
+                "propertyName": {
+                  "type": "string|number|boolean|array|object|null",
+                  "nullable": true|false,
+                  "description": "Description of the property",
+                }
+              }
+            },
+            "example": "example value", // in the case of values that are not objects
+            "examples": { // in the case of values that are objects
+              "exampleName": {
+                "value": "example value",
+                "summary": "example summary",
+                "description": "example description"
+              }
+            }
+          }
+        }
+      },
       "parameters": [
         {
           "name": "parameterName",

@@ -43,31 +43,6 @@ export function parseRouteFile(
     }
   })
 
-  // Look for handler exports (GET, POST, etc.)
-  HTTP_METHODS.forEach(method => {
-    const upperMethod = method.toUpperCase()
-    ts.forEachChild(sourceFile, node => {
-      if (ts.isExportDeclaration(node)) {
-        const exportClause = node.exportClause
-        if (exportClause && ts.isNamedExports(exportClause)) {
-          exportClause.elements.forEach(element => {
-            if (element.name.text === upperMethod || element.name.text === method) {
-              if (verbose) console.log(`Found exported HTTP method: ${method}`)
-              routeDefinitions[method] = {
-                summary: `${upperMethod} endpoint`,
-                responses: {
-                  '200': {
-                    description: 'Successful response'
-                  }
-                }
-              }
-            }
-          })
-        }
-      }
-    })
-  })
-
   return routeDefinitions
 }
 

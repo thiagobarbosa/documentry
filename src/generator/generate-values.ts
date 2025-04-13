@@ -31,6 +31,7 @@ export async function generateOpenAPIValues(
       operation.summary = updatedOperation.summary
       operation.description = updatedOperation.description
       operation.parameters = updatedOperation.parameters
+      operation.requestBody = updatedOperation.requestBody
 
       if (verbose) console.log(`[${routeIndex + 1}] "${route}" successfully generated`)
     } catch (error: any) {

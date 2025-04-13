@@ -1,7 +1,7 @@
 import { parseRouteFile } from './route-parser'
-import { getAPIPathFromFilePath } from './path-utils'
+import { convertRouteToPath } from './path-utils'
 
 export {
   parseRouteFile,
-  getAPIPathFromFilePath
+  convertRouteToPath
 }
