@@ -2,6 +2,7 @@ import path from 'path'
 import { program } from 'commander'
 import { CliOptions } from './types'
 import { generateOpenAPISpecs } from './generator'
+import * as process from 'node:process'
 
 /**
  * Initialize CLI for the OpenAPI generator
@@ -9,14 +10,15 @@ import { generateOpenAPISpecs } from './generator'
 export function initCli(): CliOptions {
   program
     .name('nextjs-openapi-generator')
-    .description('Generate OpenAPI specs from Next.js API routes')
+    .description('Automatically generate OpenAPI specs from Next.js API routes using LLM models.')
     .option('-d, --dir <directory>', 'Directory containing API routes', './app/api')
     .option('-o, --output <file>', 'Output file for OpenAPI specs', './openapi.json')
     .option('-j, --json', 'Output as JSON instead of YAML')
     .option('-y, --yaml', 'Output as YAML instead of JSON')
     .option('-v, --verbose', 'Verbose output')
-    .option('-l, --llm <model>', 'Use LLM for analysis (e.g., anthropic)')
-    .option('-a, --anthropic-key <key>', 'Anthropic API key (can also use ANTHROPIC_API_KEY env var)', process.env.ANTHROPIC_API_KEY)
+    .option('-p, --provider <provider>', 'LLM provider (e.g., anthropic)', process.env.LLM_PROVIDER || 'anthropic')
+    .option('-m, --model <model>', 'LLM model (e.g., claude-3-5-sonnet-latest)', process.env.LLM_MODEL || 'claude-3-5-sonnet-latest')
+    .option('-k, --api-key <key>', 'LLM provider API key', process.env.LLM_PROVIDER_API_KEY)
     .parse(process.argv)
 
   const options = program.opts()
@@ -27,8 +29,9 @@ export function initCli(): CliOptions {
     json: options.json,
     yaml: options.yaml,
     verbose: options.verbose,
-    llm: options.llm,
-    anthropicKey: options.anthropicKey
+    provider: options.provider,
+    model: options.model,
+    apiKey: options.apiKey
   }
 }
 

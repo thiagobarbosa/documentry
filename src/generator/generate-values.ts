@@ -24,7 +24,7 @@ export async function generateOpenAPIValues(
   for (const [method, operation] of Object.entries(routeDefinitions)) {
     const route = `${method.toUpperCase()} ${apiPath}`
     try {
-      console.log(`\n[${routeIndex + 1}] Analyzing method "${route}"`)
+      console.log(`[${routeIndex + 1}] Analyzing method "${route}"`)
       const updatedOperation = await anthropicService.generateOperation(filePath, method, route)
 
       // Apply Claude's enhancements to the operation
@@ -32,7 +32,7 @@ export async function generateOpenAPIValues(
       operation.description = updatedOperation.description
       operation.parameters = updatedOperation.parameters
 
-      if (verbose) console.log(`[${routeIndex + 1}] "${route}" documentation enhanced with Claude.`)
+      if (verbose) console.log(`[${routeIndex + 1}] "${route}" successfully generated`)
     } catch (error: any) {
       throw new Error(error.message)
     }

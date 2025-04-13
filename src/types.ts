@@ -7,8 +7,9 @@ export interface CliOptions {
   json: boolean
   yaml: boolean
   verbose: boolean
-  llm?: string
-  anthropicKey?: string
+  provider: string
+  model: string
+  apiKey: string
 }
 
 // Claude analysis result

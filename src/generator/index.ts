@@ -7,6 +7,7 @@ import { BASE_OPENAPI_SPEC, CliOptions } from '@/types'
 import { getAPIPathFromFilePath, parseRouteFile } from '@/parser'
 import { generateOpenAPIValues } from './generate-values'
 import { AnthropicService } from '@/services/providers/anthropic'
+import assert from 'node:assert'
 
 /**
  * Generate OpenAPI specifications from Next.js API routes
@@ -14,8 +15,11 @@ import { AnthropicService } from '@/services/providers/anthropic'
  * @param options - CLI options
  */
 export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
-  const { dir, output, json, yaml: useYaml, verbose, llm, anthropicKey } = options
-  const outputExt = useYaml ? 'yaml' : (json ? 'json' : 'yaml')
+  const { dir, output, json: useJson, yaml: useYaml, verbose, provider, model, apiKey } = options
+
+  assert(provider === 'anthropic', 'Only "anthropic" provider is supported at this time.')
+
+  const outputExt = useYaml ? 'yaml' : useJson ? 'json' : 'yaml'
   const outputPath = `${output.replace(/\.\w+$/, '')}.${outputExt}`
   let errorCount = 0
 
@@ -33,17 +37,12 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     // Create a deep copy of the base spec to avoid modifying the original
     const openAPISpec: OpenAPIObject = JSON.parse(JSON.stringify(BASE_OPENAPI_SPEC))
 
-    // Initialize Claude service if enhancement is enabled
-    // Currently only supports Claude
-    let anthropicService: AnthropicService | null = null
-    if (llm === 'anthropic') {
-      if (!anthropicKey) {
-        console.warn('Claude enhancement enabled but no API key provided. Please set ANTHROPIC_API_KEY environment variable or use --anthropic-key.')
-        console.warn('Continuing without Claude enhancement...')
-      } else {
-        anthropicService = new AnthropicService(anthropicKey, process.env.ANTHROPIC_API_MODEL, verbose)
-      }
-    }
+    // Initialize Anthropic service if enhancement is enabled
+    // Currently only supports Anthropic
+    assert(provider === 'anthropic', 'No Anthropic API key provided. ' +
+      'Please set the LLM_PROVIDER_API_KEY environment variable or use --api-key option.')
+
+    const anthropicService = new AnthropicService(apiKey, model, verbose)
 
     // Process each route file
     for (const [routeIndex, routeFile] of routeFiles.entries()) {
@@ -56,15 +55,13 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
       // Parse route file
       const routeDefinitions = parseRouteFile(fullPath, verbose)
 
-      // Enhance with Claude if available
-      if (anthropicService) {
-        try {
-          await generateOpenAPIValues(fullPath, routeDefinitions, anthropicService, apiPath, verbose, routeIndex)
-        } catch (error: any) {
-          console.error(`Error processing "${apiPath}" with Claude:`, error.message)
-          errorCount++
-          continue // Skip this route if enhancement fails
-        }
+      // Generate OpenAPI values using Anthropic
+      try {
+        await generateOpenAPIValues(fullPath, routeDefinitions, anthropicService, apiPath, verbose, routeIndex)
+      } catch (error: any) {
+        console.error(`Error processing "${apiPath}" with ${provider}:`, error.message, '\n')
+        errorCount++
+        continue // Skip this route if enhancement fails
       }
 
       // Add to OpenAPI spec
@@ -72,7 +69,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     }
 
     if (errorCount === routeFiles.length) {
-      console.error('\nFailed to generate OpenAPI specs. Please check the logs for details.')
+      console.error('Failed to generate OpenAPI specs. Please check the logs for details.')
       return
     }
 
@@ -84,10 +81,10 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     }
 
     if (errorCount > 0) {
-      console.error('\nFailed to generate OpenAPI specs for', errorCount, 'route(s). ' +
+      console.error('Failed to generate OpenAPI specs for', errorCount, 'route(s). ' +
         'Please check the logs for details since the OpenAPI spec may be incomplete.')
     } else {
-      console.log(`\nSUCCESS! OpenAPI specs generated at ${outputPath}`)
+      console.log('\nSUCCESS! OpenAPI specs generated at ', outputPath)
     }
   } catch (error: any) {
     throw new Error(`Error generating OpenAPI specs: ${error.message}`)
