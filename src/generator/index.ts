@@ -1,13 +1,12 @@
 import fs from 'fs'
+import assert from 'node:assert'
 import path from 'path'
 import { glob } from 'glob'
 import yaml from 'js-yaml'
-import { OpenAPIObject, OperationObject } from 'openapi3-ts/oas30'
+import { OpenAPIObject } from 'openapi3-ts/oas30'
 import { BASE_OPENAPI_SPEC, CliOptions } from '@/types'
-import { convertRouteToPath, parseRouteFile } from '@/parser'
-import { generateOpenAPIValues } from './generate-values'
 import { AnthropicService } from '@/services/providers/anthropic'
-import assert from 'node:assert'
+import { convertRouteToPath, getHTTPMethodsFromFile } from '@/parsers'
 
 /**
  * Generate OpenAPI specifications from Next.js API routes
@@ -18,6 +17,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
   const { dir, output, json: useJson, yaml: useYaml, verbose, provider, model, apiKey } = options
 
   assert(provider === 'anthropic', 'Only "anthropic" provider is supported at this time.')
+  assert(apiKey, 'API key is required. Please set the LLM_PROVIDER_API_KEY environment variable or use --api-key option.')
 
   const outputExt = useYaml ? 'yaml' : useJson ? 'json' : 'yaml'
   const outputPath = `${output.replace(/\.\w+$/, '')}.${outputExt}`
@@ -37,11 +37,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     // Create a deep copy of the base spec to avoid modifying the original
     const openAPISpec: OpenAPIObject = JSON.parse(JSON.stringify(BASE_OPENAPI_SPEC))
 
-    // Initialize Anthropic service if enhancement is enabled
-    // Currently only supports Anthropic
-    assert(provider === 'anthropic', 'No Anthropic API key provided. ' +
-      'Please set the LLM_PROVIDER_API_KEY environment variable or use --api-key option.')
-
+    // Initialize Anthropic service
     const anthropicService = new AnthropicService(apiKey, model, verbose)
 
     // Process each route file
@@ -50,22 +46,46 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
 
       // Get API path from file path
       const apiPath = convertRouteToPath(routeFile)
-      if (verbose) console.log(`[${routeIndex + 1}] Processing ${apiPath}`)
 
-      // Parse route file
-      const routeDefinitions = parseRouteFile(fullPath, verbose)
+      // Extract HTTP methods from the file
+      const httpMethods = getHTTPMethodsFromFile(fullPath, verbose)
 
-      // Generate OpenAPI values using Anthropic
-      try {
-        await generateOpenAPIValues(fullPath, routeDefinitions, anthropicService, apiPath, verbose, routeIndex)
-      } catch (error: any) {
-        console.error(`Error processing "${apiPath}" with ${provider}:`, error.message, '\n')
-        errorCount++
-        continue // Skip this route if enhancement fails
+      if (httpMethods.length === 0) {
+        if (verbose) console.log(`No HTTP methods found for ${apiPath}`)
+        continue
       }
 
-      // Add to OpenAPI spec
-      addRouteToOpenAPISpec(apiPath, routeDefinitions, openAPISpec, verbose)
+      // Initialize path in OpenAPI spec
+      if (!openAPISpec.paths[apiPath]) {
+        openAPISpec.paths[apiPath] = {}
+      }
+
+      // Process each HTTP method
+      for (const method of httpMethods) {
+        const route = `${method.toUpperCase()} ${apiPath}`
+        try {
+          console.log(`[${routeIndex + 1}] Analyzing method "${route}"`)
+          const operation = await anthropicService.generateOperation(fullPath, method, route)
+
+          // Add to OpenAPI spec
+          openAPISpec.paths[apiPath][method as any] = {
+            summary: operation.summary,
+            description: operation.description,
+            parameters: operation.parameters,
+            requestBody: operation.requestBody,
+            responses: {
+              '200': {
+                description: 'Successful response'
+              }
+            }
+          }
+
+          if (verbose) console.log(`[${routeIndex + 1}] "${route}" successfully generated`)
+        } catch (error: any) {
+          console.error(`Error processing "${route}" with ${provider}:`, error.message, '\n')
+          errorCount++
+        }
+      }
     }
 
     if (errorCount === routeFiles.length) {
@@ -88,35 +108,5 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     }
   } catch (error: any) {
     throw new Error(`Error generating OpenAPI specs: ${error.message}`)
-  }
-}
-
-/**
- * Add route definitions to OpenAPI spec
- *
- * @param apiPath - API path (e.g. '/users/{id}')
- * @param routeDefinitions - Map of HTTP methods to OpenAPI operations
- * @param openAPISpec - OpenAPI specification to update
- * @param verbose - Whether to log verbose output
- */
-function addRouteToOpenAPISpec(
-  apiPath: string,
-  routeDefinitions: Record<string, OperationObject>,
-  openAPISpec: OpenAPIObject,
-  verbose = false
-): void {
-  if (Object.keys(routeDefinitions).length === 0) {
-    if (verbose) console.log(`No route definitions found for ${apiPath}`)
-    return
-  }
-
-  // Create path item if it doesn't exist
-  if (!openAPISpec.paths[apiPath]) {
-    openAPISpec.paths[apiPath] = {}
-  }
-
-  // Add each HTTP method
-  for (const [method, operation] of Object.entries(routeDefinitions)) {
-    openAPISpec.paths[apiPath][method as any] = operation
   }
 }

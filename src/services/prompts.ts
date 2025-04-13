@@ -34,8 +34,7 @@ export const buildPrompt = (route: string, methodImplementation: string): string
             "examples": { // in the case of values that are objects
               "exampleName": {
                 "value": "example value",
-                "summary": "example summary",
-                "description": "example description"
+                "summary": "example summary"
               }
             }
           }
@@ -44,7 +43,7 @@ export const buildPrompt = (route: string, methodImplementation: string): string
       "parameters": [
         {
           "name": "parameterName",
-          "in": "query|path|body|header",
+          "in": "query|header|path|cookie",
           "required": true|false,
           "schema": {
             "type": "string|number|boolean|array|object|null",

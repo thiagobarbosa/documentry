@@ -1,9 +1,8 @@
 import { Anthropic } from '@anthropic-ai/sdk'
 import fs from 'fs'
 import { GeneratedAPIOperation } from '@/types'
-import { extractMethodImplementation } from '@/services/utils'
 import { buildPrompt } from '@/services/prompts'
-import { parseLLMResponse } from '@/parser/parse-llm-response'
+import { extractMethodImplementation, parseLLMResponse } from '@/parsers'
 
 /**
  * Claude service for generating OpenAPI operation details
