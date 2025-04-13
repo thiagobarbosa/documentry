@@ -22,6 +22,14 @@ export const buildPrompt = (route: string, methodImplementation: string): string
           "schema": {
             "type": "string|number|boolean|array|object|null",
             "nullable": true|false
+          },
+          "example": "example value", // in the case of values that are not objects
+          "examples": { // in the case of values that are objects
+            "exampleName": {
+              "value": "example value",
+              "summary": "example summary",
+              "description": "example description"
+            }
           }
         }
       ]
