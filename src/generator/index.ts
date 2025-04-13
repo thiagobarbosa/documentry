@@ -43,7 +43,6 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     }
 
     // Process each route file
-    // for loop with index
     for (const [routeIndex, routeFile] of routeFiles.entries()) {
       const fullPath = path.join(dir, routeFile)
 

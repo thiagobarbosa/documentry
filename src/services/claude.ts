@@ -1,9 +1,11 @@
 import { Anthropic } from '@anthropic-ai/sdk'
 import fs from 'fs'
+import { ParameterObject, ReferenceObject } from 'openapi3-ts/oas30'
 
 interface EndpointAnalysis {
   summary: string;
   description: string;
+  parameters?: (ParameterObject | ReferenceObject)[]
 }
 
 export class ClaudeService {
@@ -42,7 +44,7 @@ export class ClaudeService {
         }
       }
 
-      const prompt = this.buildPrompt(fileContent, httpMethod, methodImplementation)
+      const prompt = this.buildPrompt(route, methodImplementation)
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: 1000,
@@ -112,33 +114,69 @@ export class ClaudeService {
   /**
    * Builds the prompt for Claude to analyze the route implementation
    */
-  private buildPrompt(fileContent: string, httpMethod: string, methodImplementation: string): string {
-    return `You are analyzing a Next.js API route file to generate OpenAPI documentation.
-
-Please examine this TypeScript code for a ${httpMethod.toUpperCase()} endpoint:
-
-\`\`\`typescript
-${fileContent}
-\`\`\`
-
-Focus particularly on this implementation:
-
-\`\`\`typescript
-${methodImplementation}
-\`\`\`
-
-Based on your analysis of the code, please provide:
-
-1. A concise summary (max 10 words) that describes what this API endpoint does
-2. A more detailed description (2-5 sentences) explaining the endpoint's purpose, any query parameters, and the response format
-
-Your response should be in the following JSON format:
-{
-  "summary": "Short endpoint summary",
-  "description": "Detailed endpoint description explaining parameters and functionality",
-}
-
-Only return valid JSON. Do not include any other explanatory text.`
+  private buildPrompt(route: string, methodImplementation: string): string {
+    return `
+    You are analyzing a Next.js API route file to generate its OpenAPI documentation.
+    Examine this TypeScript code for the endpoint "${route}":
+    
+    \`\`\`typescript
+    ${methodImplementation}
+    \`\`\`
+    
+    Based on your analysis of the code, provide:
+    
+    1. A concise summary (max 10 words) that describes what this API endpoint does
+    2. A more expanded description (a few sentences) explaining the endpoint's purpose, parameters, and functionality. 
+    Be short and straightforward and use user-friendly language.
+    3: Parameter accepted by the endpoint and their types (ignore any Next.js specific types like NextRequest, NextResponse, etc.).
+    Make sure to analyze the body of the function to find the parameters used in the implementation.
+    For instance, if the function has a code like this:
+    \`\`\`typescript
+    export async function GET(request: NextRequest) {
+      const { searchParams } = new URL(request.url)
+      const id = searchParams.get('id')"
+      if (!id) throw new Error('id not provided')
+      
+      (... rest of the code ...)
+    }
+    \`\`\`
+    Then 'id' is a query parameter of type string required by the endpoint.
+    
+    And a code like this:
+    \`\`\`typescript
+    export async function GET(
+      request: NextRequest,
+      { params }: { params: { id: string } }) 
+    {
+      (.. rest of the code ...)
+    }
+    \`\`\`
+    
+    Then 'id' is a path parameter of type string required by the endpoint.
+    
+    Also, keep in mind that some path parameters might not appear on the function signature, 
+    but on the route path itself. For instance, if the route is '/hotel/{id}/another-thing', 
+    then 'id' is a path parameter of type string required by the endpoint regardless of whether 
+    it appears on the function signature or not.
+    
+    Your response should be in the following JSON format:
+    {
+      "summary": "Short endpoint summary",
+      "description": "Expanded endpoint description",
+      "parameters": [
+        {
+          "name": "parameterName",
+          "in": "query|path|body|header",
+          "required": true|false,
+          "schema": {
+            "type": "string|number|boolean|array|object|null",
+            "nullable": true|false,
+          }
+        }
+      ]
+    }
+    
+    Only return valid JSON. Do not include any other explanatory text.`
   }
 
   /**
@@ -151,11 +189,12 @@ Only return valid JSON. Do not include any other explanatory text.`
         responseText.match(/({[\s\S]*})/)
 
       const jsonText = jsonMatch ? jsonMatch[1] : responseText
-      const parsed = JSON.parse(jsonText)
+      const parsed = JSON.parse(jsonText) as EndpointAnalysis
 
       return {
         summary: parsed.summary || 'API endpoint',
         description: parsed.description || 'No description available',
+        parameters: parsed.parameters
       }
     } catch (error) {
       console.error('Error parsing Claude response:', error)
@@ -163,7 +202,7 @@ Only return valid JSON. Do not include any other explanatory text.`
 
       return {
         summary: 'API endpoint',
-        description: 'Failed to parse Claude response',
+        description: 'Failed to parse Claude response'
       }
     }
   }

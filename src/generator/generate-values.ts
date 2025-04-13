@@ -30,6 +30,7 @@ export async function generateOpenAPIValues(
       // Apply Claude's enhancements to the operation
       operation.summary = analysis.summary
       operation.description = analysis.description
+      operation.parameters = analysis.parameters
 
       if (verbose) console.log(`[${routeIndex + 1}] "${route}" documentation enhanced with Claude.`)
     } catch (error) {
