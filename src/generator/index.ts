@@ -14,7 +14,7 @@ import { AVAILABLE_LLM_PROVIDERS, createLLMService, getDefaultModel } from '@/se
  * @param options - CLI options
  */
 export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
-  const { dir, output, format, verbose, provider, model, apiKey, info } = options
+  const { dir, outputFile, format, verbose, provider, model, apiKey, info } = options
 
   assert(AVAILABLE_LLM_PROVIDERS.includes(provider as any),
     `Invalid provider "${provider}". Available providers: "${AVAILABLE_LLM_PROVIDERS.join(' | ')}"`)
@@ -23,9 +23,9 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
 
   assert(format === 'yaml' || format === 'json', 'Invalid format. Available formats: "yaml" | "json"')
 
-  console.log('> Starting OpenAPI spect generation\n', { provider, model: model || getDefaultModel(provider) }, '\n')
+  console.log('> Starting OpenAPI spec generation\n', { provider, model: model || getDefaultModel(provider), format }, '\n')
 
-  const outputPath = `${output.replace(/\.\w+$/, '')}.${format}`
+  const outputPath = `${outputFile}.${format}`
   let errorCount = 0
 
   try {
