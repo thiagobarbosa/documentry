@@ -1,14 +1,14 @@
 # Documentry
 
+[![npm version](https://img.shields.io/npm/v/documentry.svg)](https://www.npmjs.com/package/documentry)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 Documentry is a AI-powered Typescript library that uses LLM models to understand your Next.js API routes and
 automatically generate detailed OpenAPI documentation - both as `json` and `yaml`.
 
 With a single terminal command, `Documentry` scans every API route in your Next.js project,
 understand the actual code of your `route.ts` files, and generates a valid `OpenAPI Specification (OAS)` file that
 describes your endpoints.
-
-[![npm version](https://img.shields.io/npm/v/documentry.svg)](https://www.npmjs.com/package/documentry)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## Key Features
 
