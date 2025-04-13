@@ -9,12 +9,11 @@ import * as process from 'node:process'
  */
 export function initCli(): CliOptions {
   program
-    .name('nextjs-openapi-generator')
+    .name('documentry')
     .description('Automatically generate OpenAPI specs from Next.js API routes using LLM models.')
     .option('--dir <directory>', 'Directory containing API routes', './app/api')
-    .option('-o, --output <file>', 'Output file for OpenAPI specs', './openapi.json')
-    .option('-j, --json', 'Output as JSON instead of YAML')
-    .option('-y, --yaml', 'Output as YAML instead of JSON')
+    .option('-o, --output <file>', 'Output file for OpenAPI specs', './openapi.yaml')
+    .option('-f, --format <format>', 'Output format (yaml or json)', 'yaml')
     .option('--verbose', 'Verbose output')
 
     // OpenAPI spec options
@@ -33,8 +32,7 @@ export function initCli(): CliOptions {
   return {
     dir: path.resolve(process.cwd(), options.dir),
     output: path.resolve(process.cwd(), options.output),
-    json: options.json,
-    yaml: options.yaml,
+    format: options.format,
     verbose: options.verbose,
     provider: options.provider,
     model: options.model,

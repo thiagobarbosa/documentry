@@ -14,17 +14,18 @@ import { AVAILABLE_LLM_PROVIDERS, createLLMService, getDefaultModel } from '@/se
  * @param options - CLI options
  */
 export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
-  const { dir, output, json: useJson, yaml: useYaml, verbose, provider, model, apiKey, info } = options
+  const { dir, output, format, verbose, provider, model, apiKey, info } = options
 
   assert(AVAILABLE_LLM_PROVIDERS.includes(provider as any),
     `Invalid provider "${provider}". Available providers: "${AVAILABLE_LLM_PROVIDERS.join(' | ')}"`)
 
   assert(apiKey, 'API key is required. Please set the LLM_PROVIDER_API_KEY environment variable or use --api-key option.')
 
+  assert(format === 'yaml' || format === 'json', 'Invalid format. Available formats: "yaml" | "json"')
+
   console.log('> Starting OpenAPI spect generation\n', { provider, model: model || getDefaultModel(provider) }, '\n')
 
-  const outputExt = useYaml ? 'yaml' : useJson ? 'json' : 'yaml'
-  const outputPath = `${output.replace(/\.\w+$/, '')}.${outputExt}`
+  const outputPath = `${output.replace(/\.\w+$/, '')}.${format}`
   let errorCount = 0
 
   try {
@@ -106,7 +107,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     }
 
     // Write OpenAPI spec to file
-    if (outputExt === 'yaml') {
+    if (format === 'yaml') {
       fs.writeFileSync(outputPath, yaml.dump(openAPISpec))
     } else {
       fs.writeFileSync(outputPath, JSON.stringify(openAPISpec, null, 2))
