@@ -7,6 +7,7 @@ import { glob } from 'glob'
 import { program } from 'commander'
 import yaml from 'js-yaml'
 import { OpenAPIObject, OperationObject, SchemaObject } from 'openapi3-ts/oas30'
+import { ClaudeService } from './claude'
 
 // Basic OpenAPI template
 const baseOpenAPISpec: OpenAPIObject = {
@@ -43,9 +44,12 @@ program
   .name('nextjs-openapi-generator')
   .description('Generate OpenAPI specs from Next.js API routes')
   .option('-d, --dir <directory>', 'Directory containing API routes', './app/api')
-  .option('-o, --output <file>', 'Output file for OpenAPI specs', './openapi.yaml')
+  .option('-o, --output <file>', 'Output file for OpenAPI specs', './openapi.json')
   .option('-j, --json', 'Output as JSON instead of YAML')
+  .option('-y, --yaml', 'Output as YAML instead of JSON')
   .option('-v, --verbose', 'Verbose output')
+  .option('-c, --claude', 'Use Claude to enhance API documentation')
+  .option('-a, --anthropic-key <key>', 'Anthropic API key (can also use ANTHROPIC_API_KEY env var)')
   .parse(process.argv)
 
 const options = program.opts()
@@ -53,6 +57,8 @@ const apiDir = path.resolve(process.cwd(), options.dir)
 const outputFile = path.resolve(process.cwd(), options.output)
 const outputExt = options.json ? 'json' : 'yaml'
 const verbose = options.verbose
+const useClaudeEnhancement = options.claude || true
+const anthropicApiKey = options.anthropicKey || process.env.ANTHROPIC_API_KEY
 
 // Main function to generate OpenAPI specs
 async function generateOpenAPISpecs() {
@@ -69,6 +75,18 @@ async function generateOpenAPISpecs() {
 
     console.log(`Found ${routeFiles.length} route files.`)
 
+    // Initialize Claude service if enhancement is enabled
+    let claudeService: ClaudeService | null = null
+    if (useClaudeEnhancement) {
+      if (!anthropicApiKey) {
+        console.warn('Claude enhancement enabled but no API key provided. Please set ANTHROPIC_API_KEY environment variable or use --anthropic-key.')
+        console.warn('Continuing without Claude enhancement...')
+      } else {
+        console.log('Initializing Claude for API documentation enhancement...')
+        claudeService = new ClaudeService(anthropicApiKey, verbose)
+      }
+    }
+
     // Process each route file
     for (const routeFile of routeFiles) {
       const fullPath = path.join(apiDir, routeFile)
@@ -81,22 +99,51 @@ async function generateOpenAPISpecs() {
       // Parse route file
       const routeDefinitions = parseRouteFile(fullPath)
 
+      // Enhance with Claude if available
+      if (claudeService) {
+        await enhanceWithClaude(fullPath, routeDefinitions, claudeService)
+      }
+
       // Add to OpenAPI spec
       addRouteToOpenAPISpec(apiPath, routeDefinitions)
     }
 
     // Write OpenAPI spec to file
     const outputPath = `${outputFile.replace(/\.\w+$/, '')}.${outputExt}`
-    if (outputExt === 'json') {
-      fs.writeFileSync(outputPath, JSON.stringify(baseOpenAPISpec, null, 2))
-    } else {
+    if (outputExt === 'yaml') {
       fs.writeFileSync(outputPath, yaml.dump(baseOpenAPISpec))
+    } else {
+      fs.writeFileSync(outputPath, JSON.stringify(baseOpenAPISpec, null, 2))
     }
 
     console.log(`OpenAPI specs generated at ${outputPath}`)
   } catch (error) {
     console.error('Error generating OpenAPI specs:', error)
     process.exit(1)
+  }
+}
+
+// Enhance OpenAPI operations with Claude analysis
+async function enhanceWithClaude(
+  filePath: string,
+  routeDefinitions: Record<string, OperationObject>,
+  claudeService: ClaudeService
+): Promise<void> {
+  if (verbose) console.log(`Enhancing API docs with Claude for ${filePath}...`)
+
+  for (const [method, operation] of Object.entries(routeDefinitions)) {
+    try {
+      console.log(`Analyzing "${method.toUpperCase()} ${filePath}" method with Claude...`)
+      const analysis = await claudeService.analyzeRouteFile(filePath, method)
+
+      // Apply Claude's enhancements to the operation
+      operation.summary = analysis.summary
+      operation.description = analysis.description
+
+      if (verbose) console.log(`Enhanced ${method.toUpperCase()} method documentation with Claude`)
+    } catch (error) {
+      console.error(`Error enhancing ${method} documentation with Claude:`, error)
+    }
   }
 }
 
@@ -219,13 +266,6 @@ function extractOperationObject(node: ts.Node, httpMethod: string): OperationObj
   }
 
   try {
-    // Extract docstring comment if available
-    const docComment = extractDocComment(node)
-    if (docComment) {
-      // Use docstring for description
-      operation.description = docComment
-    }
-
     // Try to extract request body schema for POST, PUT, PATCH
     if (['post', 'put', 'patch'].includes(httpMethod)) {
       const requestBodySchema = extractRequestBodySchema(node)
@@ -270,76 +310,6 @@ function extractOperationObject(node: ts.Node, httpMethod: string): OperationObj
   }
 
   return operation
-}
-
-// Extract docstring comments from a node
-function extractDocComment(node: ts.Node): string | undefined {
-  // Get the full text of the source file
-  const sourceFile = node.getSourceFile()
-  if (!sourceFile) return undefined
-
-  const nodeStart = node.getStart()
-  const nodePos = node.pos
-
-  // Get the text between the node position and the node start
-  // This range often contains comments
-  const commentRange = sourceFile.text.substring(nodePos, nodeStart)
-
-  // Check for JSDoc-style comments (/** ... */)
-  const jsdocCommentRegex = /\/\*\*([\s\S]*?)\*\//
-  const jsdocMatch = commentRange.match(jsdocCommentRegex)
-
-  if (jsdocMatch && jsdocMatch[1]) {
-    // Process JSDoc comment
-    return processComment(jsdocMatch[1])
-  }
-
-  // Check for single-line comments (// ...)
-  const singleLineComments = commentRange.match(/\/\/\s*(.*)/g)
-  if (singleLineComments && singleLineComments.length > 0) {
-    // Join multiple single-line comments
-    const commentText = singleLineComments
-      .map(comment => comment.replace(/^\/\/\s*/, ''))
-      .join('\n')
-    return processComment(commentText)
-  }
-
-  // For function declarations, also check leading comments
-  if (ts.isFunctionDeclaration(node) && node.name) {
-    const leadingComments = ts.getLeadingCommentRanges(sourceFile.text, node.pos)
-    if (leadingComments && leadingComments.length > 0) {
-      const commentTexts = leadingComments.map(comment => {
-        const commentText = sourceFile.text.substring(comment.pos, comment.end)
-        if (commentText.startsWith('/**')) {
-          // JSDoc-style comment
-          const match = commentText.match(/\/\*\*([\s\S]*?)\*\//)
-          return match ? match[1] : ''
-        } else if (commentText.startsWith('//')) {
-          // Single-line comment
-          return commentText.replace(/^\/\/\s*/, '')
-        }
-        return ''
-      })
-
-      return processComment(commentTexts.join('\n'))
-    }
-  }
-
-  return undefined
-}
-
-// Process raw comment text to make it more readable
-function processComment(commentText: string): string {
-  return commentText
-    .split('\n')
-    .map(line =>
-      line
-        .trim()
-        .replace(/^\s*\*\s*/, '') // Remove leading * from JSDoc lines
-        .replace(/@\w+\s+/, '')   // Remove JSDoc tags
-    )
-    .filter(line => line.length > 0)
-    .join('\n')
 }
 
 // Extract request body schema
@@ -471,10 +441,70 @@ function convertTypeToSchema(typeNode: ts.TypeNode): SchemaObject {
 function extractParameters(node: ts.Node): any[] {
   const parameters: any[] = []
 
-  // This is a simplified implementation
-  // Look for common patterns in parameter extraction
+  // Handle function declarations
+  if (ts.isFunctionDeclaration(node) && node.parameters) {
+    extractParamsFromParameterList(node.parameters, parameters)
+  }
+
+  // Handle variable declarations with arrow functions
+  if (ts.isVariableStatement(node)) {
+    for (const declaration of node.declarationList.declarations) {
+      if (declaration.initializer &&
+        (ts.isArrowFunction(declaration.initializer) || ts.isFunctionExpression(declaration.initializer))) {
+        extractParamsFromParameterList(declaration.initializer.parameters, parameters)
+      }
+    }
+  }
 
   return parameters
+}
+
+// Extract parameters from parameter list
+function extractParamsFromParameterList(parameterList: ts.NodeArray<ts.ParameterDeclaration>, parameters: any[]): void {
+  for (const param of parameterList) {
+    // Skip the first parameter (request object)
+    if (parameterList.indexOf(param) === 0) continue
+
+    // Handle destructured parameters like { params }: { params: { id: string } }
+    if (param.name && ts.isObjectBindingPattern(param.name)) {
+      for (const element of param.name.elements) {
+        if (ts.isBindingElement(element) && element.name && ts.isIdentifier(element.name)) {
+          const paramName = element.name.text
+
+          // Try to extract type information if available
+          if (param.type && ts.isTypeLiteralNode(param.type)) {
+            for (const member of param.type.members) {
+              if (ts.isPropertySignature(member) &&
+                member.name &&
+                ts.isIdentifier(member.name) &&
+                member.name.text === paramName &&
+                member.type) {
+
+                // If this is a nested object like params: { id: string }
+                if (ts.isTypeLiteralNode(member.type)) {
+                  for (const nestedMember of member.type.members) {
+                    if (ts.isPropertySignature(nestedMember) &&
+                      nestedMember.name &&
+                      ts.isIdentifier(nestedMember.name)) {
+
+                      const pathParam = {
+                        name: nestedMember.name.text,
+                        in: 'path',
+                        required: true,
+                        schema: nestedMember.type ? convertTypeToSchema(nestedMember.type) : { type: 'string' }
+                      }
+
+                      parameters.push(pathParam)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 // Add route definitions to OpenAPI spec
@@ -494,8 +524,5 @@ function addRouteToOpenAPISpec(apiPath: string, routeDefinitions: Record<string,
     baseOpenAPISpec.paths[apiPath][method as any] = operation
   }
 }
-
-// Run the generator
-generateOpenAPISpecs()
 
 export { generateOpenAPISpecs }
