@@ -16,7 +16,7 @@ export function initCli(): CliOptions {
     .option('-y, --yaml', 'Output as YAML instead of JSON')
     .option('-v, --verbose', 'Verbose output')
     .option('-l, --llm <model>', 'Use LLM for analysis (e.g., anthropic)')
-    .option('-a, --anthropic-key <key>', 'Anthropic API key (can also use ANTHROPIC_API_KEY env var)')
+    .option('-a, --anthropic-key <key>', 'Anthropic API key (can also use ANTHROPIC_API_KEY env var)', process.env.ANTHROPIC_API_KEY)
     .parse(process.argv)
 
   const options = program.opts()
