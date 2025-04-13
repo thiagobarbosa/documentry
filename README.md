@@ -61,19 +61,18 @@ await generateOpenAPISpecs({
 
 ## Configuration Options
 
-| Option          | CLI Flag                          | Description                            | Default                                                        |
-|-----------------|-----------------------------------|----------------------------------------|----------------------------------------------------------------|
-| Directory       | `--dir <directory>`               | Directory containing Nextjs API routes | `./app/api`                                                    |
-| Output file     | `-o, --output-file <file>`        | Output file for OpenAPI specs          | `./docs/openapi`                                               |
-| JSON format     | `-j, --json`                      | Output as JSON instead of YAML         | `false`                                                        |
-| YAML format     | `-y, --yaml`                      | Output as YAML instead of JSON         | `true`                                                         |
-| Verbose output  | `--verbose`                       | Verbose output                         | `false`                                                        |
-| API title       | `-t, --title <title>`             | Title for the OpenAPI spec             | `Next.js API`                                                  |
-| API description | `-d, --description <description>` | Description for the OpenAPI spec       | `Automatically generated API documentation for Next.js routes` |
-| API version     | `-v, --version <version>`         | Version for the OpenAPI spec           | `1.0.0`                                                        |
-| LLM provider    | `-p, --provider <provider>`       | LLM provider (anthropic or openai)     | Environment variable `LLM_PROVIDER`                            |
-| LLM model       | `-m, --model <model>`             | LLM model to use                       | Environment variable `LLM_MODEL`                               |
-| API key         | `-k, --api-key <key>`             | LLM provider API key                   | Environment variable `LLM_PROVIDER_API_KEY`                    |
+| Flag                              | Description                                                                     | Default                                     |
+|-----------------------------------|---------------------------------------------------------------------------------|---------------------------------------------|
+| `--dir <directory>`               | Directory containing your Nextjs API routes (`./app/api`, `./src/app/api`, etc) | `./app/api`                                 |
+| `-o, --output-file <file>`        | Output folder/file for the generated OpenAPI specs                              | `./docs/openapi`                            |
+| `-f, --format`                    | The format for the generated OpenAPI file (either `yaml` or `json`              | `yaml`                                      |
+| `--verbose`                       | Verbose output                                                                  | `false`                                     |
+| `-t, --title <title>`             | Title for the OpenAPI spec                                                      | `Next.js API`                               |
+| `-d, --description <description>` | Description for the OpenAPI spec                                                | `API documentation for Next.js routes`      |
+| `-v, --version <version>`         | Version for the OpenAPI spec                                                    | `1.0.0`                                     |
+| `-p, --provider <provider>`       | LLM provider (`anthropic` or `openai`)                                          | Environment variable `LLM_PROVIDER`         |
+| `-m, --model <model>`             | LLM model to use                                                                | Environment variable `LLM_MODEL`            |
+| `-k, --api-key <key>`             | LLM provider API key                                                            | Environment variable `LLM_PROVIDER_API_KEY` |
 
 ## Environment Variables
 
