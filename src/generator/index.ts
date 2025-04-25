@@ -5,8 +5,8 @@ import { glob } from 'glob'
 import yaml from 'js-yaml'
 import { OpenAPIObject } from 'openapi3-ts/oas30'
 import { BASE_OPENAPI_SPEC, CliOptions } from '@/types'
-import { convertRouteToPath, getHTTPMethodsFromFile } from '@/parsers'
 import { AVAILABLE_LLM_PROVIDERS, createLLMService, getDefaultModel } from '@/services/providers/llm-provider'
+import { processAllRoutes } from '@/generator/process-routes'
 
 /**
  * Generate OpenAPI specifications from Next.js API routes
@@ -54,56 +54,20 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     // Initialize LLM service
     const llmService = createLLMService(provider, apiKey, model, verbose)
 
-    // Process each route file
-    for (const [routeIndex, routeFile] of routeFiles.entries()) {
-      const fullPath = path.join(dir, routeFile)
-
-      // Get API path from file path
-      const apiPath = convertRouteToPath(routeFile)
-
-      // Extract HTTP methods from the file
-      const httpMethods = getHTTPMethodsFromFile(fullPath, verbose)
-
-      if (httpMethods.length === 0) {
-        if (verbose) console.log(`No HTTP methods found for ${apiPath}`)
-        continue
-      }
-
-      // Initialize path in OpenAPI spec
-      if (!openAPISpec.paths[apiPath]) {
-        openAPISpec.paths[apiPath] = {}
-      }
-
-      console.log('\n> File', routeIndex + 1, '\n', { path: apiPath, numberOfMethods: httpMethods.length })
-
-      // Process each HTTP method
-      for (const method of httpMethods) {
-        const route = `${method.toUpperCase()} ${apiPath}`
-        try {
-          console.log('Generating specs for', { route: `${method.toUpperCase()} ${apiPath}` })
-
-          const operation = await llmService.generateOperation(fullPath, method, route)
-
-          // Add to OpenAPI spec
-          openAPISpec.paths[apiPath][method as any] = {
-            summary: operation.summary,
-            description: operation.description,
-            parameters: operation.parameters,
-            requestBody: operation.requestBody,
-            responses: {
-              '200': {
-                description: 'Successful response'
-              }
-            }
-          }
-
-          if (verbose) console.log(`"${route}" successfully generated`)
-        } catch (error: any) {
-          console.error(`Error processing "${route}" with ${provider}:`, error.message, '\n')
-          errorCount++
-        }
-      }
-    }
+    const startTime = Date.now()
+    await processAllRoutes({
+      dir,
+      routeFiles,
+      openAPISpec,
+      llmService,
+      provider,
+      verbose: verbose || false
+    }).catch((err => {
+      console.error('Error processing route file:', err)
+      errorCount++
+    }))
+    const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2)
+    console.log('> OpenAPI spec generation completed in', elapsedTime, 'seconds')
 
     if (errorCount === routeFiles.length) {
       console.error('Failed to generate OpenAPI specs. Please check the logs for details.')
