@@ -3,7 +3,7 @@ import { convertRouteToPath, getHTTPMethodsFromFile } from '@/parsers'
 import { Paths } from '@/schemas'
 import { LLMService } from '@/services/providers/llm-provider'
 
-const MAX_CONCURRENCY = 5
+const MAX_CONCURRENCY = 10
 let activePromises = 0
 let queue: Promise<any>[] = []
 
