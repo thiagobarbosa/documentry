@@ -31,6 +31,8 @@ You can use `Documentry` directly from the command line:
 
 ```bash
 npx documentry --provider provider-name --api-key your-api-key
+# or, to control which routes to process:
+npx documentry --provider provider-name --api-key your-api-key --routes "/user,/products/*"
 ```
 
 *NOTE: Your API key can also be set using a `LLM_PROVIDER_API_KEY` environment variable.*
@@ -44,18 +46,18 @@ import { generateOpenAPISpecs } from 'documentry'
 
 // Generate OpenAPI specs
 await generateOpenAPISpecs({
-   dir: './app/api',
-   routes: ['/user', '/products/*'],
-   outputFile: './docs/openapi',
-   format: 'yaml',
-   provider: 'anthropic',
-   model: 'claude-3-5-sonnet-latest',
-   apiKey: 'your-api-key',
-   info: {
-      title: 'My API',
-      version: '1.0.0',
-      description: 'My API description'
-   }
+  dir: './app/api',
+  routes: ['/user', '/products/*'],
+  outputFile: './docs/openapi',
+  format: 'yaml',
+  provider: 'anthropic',
+  model: 'claude-3-5-sonnet-latest',
+  apiKey: 'your-api-key',
+  info: {
+    title: 'My API',
+    version: '1.0.0',
+    description: 'My API description'
+  }
 })
 ```
 
@@ -64,7 +66,7 @@ await generateOpenAPISpecs({
 | Flag                              | Description                                                                   | Default                                     |
 |-----------------------------------|-------------------------------------------------------------------------------|---------------------------------------------|
 | `--dir <directory>`               | Root directory for your Nextjs API routes (`./app/api`, `./src/app/api`, etc) | `./app/api`                                 |
-| `--routes <routes>`               | Comma-separated list of routes to process (e.g., /user,/products/*)           | All routes are considered                   |
+| `--routes <routes>`               | Comma-separated list of routes to process (e.g., "/user,/products/*")         | All routes are considered                   |
 | `-o, --output-file <file>`        | Output folder/file for the generated OpenAPI specs                            | `./docs/openapi`                            |
 | `-f, --format`                    | The format for the generated OpenAPI file (either `yaml` or `json`            | `yaml`                                      |
 | `-t, --title <title>`             | Title for the OpenAPI spec                                                    | `Next.js API`                               |
