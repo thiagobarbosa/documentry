@@ -19,13 +19,25 @@ const extractHttpMethods = (content: string): string[] => {
 /**
  * Process all route files in the specified directory with concurrency control
  */
-export const processAllRoutes = async ({ dir, routeFiles, llmService, provider }: {
+export const processAllRoutes = async ({ dir, routeFiles, llmService, provider, routes }: {
   dir: string,
   routeFiles: string[],
   llmService: LLMService,
   provider: string,
+  routes?: string[],
 }): Promise<Paths> => {
   const results: Paths = {}
+
+  // Filter route files based on routes parameter
+  const filteredRouteFiles = routeFiles.filter(routeFile => shouldProcessRoute(routeFile, routes))
+
+  if (filteredRouteFiles.length === 0) {
+    console.error('\x1b[31m✗\x1b[0m No matching route files found for routes', routes)
+    return results
+  }
+
+  console.log('→ Routes found:', filteredRouteFiles.length)
+
   const processFile = async (routeFile: string, index: number) => {
     const fullPath = path.join(dir, routeFile)
     const fileContent = fs.readFileSync(fullPath, 'utf-8')
@@ -62,10 +74,43 @@ export const processAllRoutes = async ({ dir, routeFiles, llmService, provider }
   }
 
   // Process files with controlled concurrency
-  for (let i = 0; i < routeFiles.length; i += MAX_CONCURRENCY) {
-    const batch = routeFiles.slice(i, i + MAX_CONCURRENCY)
+  for (let i = 0; i < filteredRouteFiles.length; i += MAX_CONCURRENCY) {
+    const batch = filteredRouteFiles.slice(i, i + MAX_CONCURRENCY)
     await Promise.all(batch.map((file, idx) => processFile(file, i + idx)))
   }
 
   return results
+}
+
+/**
+ * Check if a route file should be processed based on the routes filter
+ * @param routeFile - The route file path relative to the directory
+ * @param routes - The routes filter provided via CLI
+ * @return - Whether the route should be processed
+ */
+export const shouldProcessRoute = (routeFile: string, routes?: string[]): boolean => {
+  // If no routes filter is provided, process all routes
+  if (!routes || routes.length === 0) {
+    return true
+  }
+
+  const apiPath = convertRouteToPath(routeFile)
+
+  for (const routePattern of routes) {
+    // Check for wildcard pattern (e.g., "/users/*")
+    if (routePattern.endsWith('/*')) {
+      const prefix = routePattern.slice(0, -1) // Remove the *
+      // Handle both the parent path and all subpaths
+      if (apiPath === prefix.slice(0, -1) || apiPath.startsWith(prefix)) {
+        return true
+      }
+      // Exact match (e.g., "/orders" or "/orders/")
+    } else if (apiPath === routePattern || (routePattern.endsWith('/') && apiPath === routePattern.slice(0, -1))) {
+      return true
+    }
+
+
+  }
+
+  return false
 }

@@ -8,6 +8,7 @@ export interface CliOptions {
   provider: typeof AVAILABLE_LLM_PROVIDERS[number]
   model: string
   apiKey: string
+  routes?: string[]
   info?: {
     title: string
     version: string

@@ -14,6 +14,7 @@ export function initCli(): CliOptions {
     .option('--dir <directory>', 'Directory containing API routes', './app/api')
     .option('-o, --output-file <file>', 'Output file for OpenAPI specs', 'openapi')
     .option('-f, --format <format>', 'Output format (yaml or json)', 'yaml')
+    .option('--routes <routes>', 'Comma-separated list of routes to process (e.g., /api/user,/api/products/*)', (value) => value.split(','))
 
     // OpenAPI spec options
     .option('-t, --title <title>', 'Title for the OpenAPI spec')
@@ -35,6 +36,7 @@ export function initCli(): CliOptions {
     provider: options.provider,
     model: options.model,
     apiKey: options.apiKey,
+    routes: options.routes,
     info: {
       title: options.title,
       version: options.version,
