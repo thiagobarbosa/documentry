@@ -27,6 +27,8 @@ export const buildPrompt = (route: string, methodImplementation: string): string
                   "type": "string|number|boolean|array|object|null",
                   "nullable": true|false,
                   "description": "Description of the property",
+                  "items": {...} // in the case of arrays
+                  
                 }
               }
             },
