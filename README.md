@@ -31,7 +31,7 @@ You can use `Documentry` directly from the command line:
 
 ```bash
 npx documentry --provider provider-name --api-key your-api-key
-# or, to control which routes to process:
+# To control which routes to process:
 npx documentry --provider provider-name --api-key your-api-key --routes "/user,/products/*"
 ```
 
@@ -57,7 +57,17 @@ await generateOpenAPISpecs({
     title: 'My API',
     version: '1.0.0',
     description: 'My API description'
-  }
+  },
+  servers: [
+    {
+      url: 'http://localhost:3000/api',
+      description: 'Local server'
+    },
+    {
+      url: 'https://api.example.com',
+      description: 'Production server'
+    }
+  ]
 })
 ```
 
@@ -66,7 +76,8 @@ await generateOpenAPISpecs({
 | Flag                              | Description                                                                   | Default                                     |
 |-----------------------------------|-------------------------------------------------------------------------------|---------------------------------------------|
 | `--dir <directory>`               | Root directory for your Nextjs API routes (`./app/api`, `./src/app/api`, etc) | `./app/api`                                 |
-| `--routes <routes>`               | Comma-separated list of routes to process (e.g., "/user,/products/*")         | All routes are considered                   |
+| `--routes <routes>`               | List of routes to process (e.g., "/user,/products/*")                         | All routes are considered                   |
+| `--servers <servers>`             | List of server URLs (e.g. "url1\|description1, url2...")                      | URL: `http://localhost:3000/api`            |
 | `-o, --output-file <file>`        | Output folder/file for the generated OpenAPI specs                            | `./docs/openapi`                            |
 | `-f, --format`                    | The format for the generated OpenAPI file (either `yaml` or `json`            | `yaml`                                      |
 | `-t, --title <title>`             | Title for the OpenAPI spec                                                    | `Next.js API`                               |

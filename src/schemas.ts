@@ -1,5 +1,12 @@
 import { z } from 'zod'
 
+const ZServer = z.object({
+  url: z.string().describe('Base URL for the server'),
+  description: z.string().optional().describe('Description of the server'),
+})
+
+const ZServers = z.array(ZServer).describe('List of servers for the API')
+
 const ZInfo = z.object({
   title: z.string(),
   version: z.string(),
@@ -90,12 +97,15 @@ const ZPaths = z.record(z.string(), ZPathItem)
 const ZOpenAPI = z.object({
   openapi: z.string(),
   info: ZInfo,
+  servers: ZServers.optional(),
   paths: ZPaths,
 })
 
 export type OpenAPI = z.infer<typeof ZOpenAPI>;
+export type Info = z.infer<typeof ZInfo>;
 export type Paths = z.infer<typeof ZPaths>;
 export type PathItem = z.infer<typeof ZPathItem>;
+export type Servers = z.infer<typeof ZServers>;
 
 export {
   ZOpenAPI,

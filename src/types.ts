@@ -1,4 +1,5 @@
 import { AVAILABLE_LLM_PROVIDERS } from '@/services/providers/llm-provider'
+import { Info, Servers } from '@/schemas'
 
 // CLI options
 export interface CliOptions {
@@ -9,11 +10,8 @@ export interface CliOptions {
   model: string
   apiKey: string
   routes?: string[]
-  info?: {
-    title: string
-    version: string
-    description: string
-  }
+  info?: Info,
+  servers?: Servers
 }
 
 // Base OpenAPI specification template

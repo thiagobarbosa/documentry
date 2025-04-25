@@ -20,6 +20,31 @@ export function initCli(): CliOptions {
     .option('-t, --title <title>', 'Title for the OpenAPI spec')
     .option('-d, --description <description>', 'Description for the OpenAPI spec')
     .option('-v, --version <version>', 'Version for the OpenAPI spec')
+    .option('--servers <servers>', 'Comma-separated list of server URLs with optional descriptions (url|description,url2|description2, ...). ' +
+      'Default: http://localhost:3000/api',
+      (value) => {
+        const servers = value.split(',').map(serverStr => {
+          // Split the server string into URL and description
+          const parts = serverStr.split('|')
+          const url = parts[0]?.trim()
+          const description = parts[1]?.trim()
+
+          if (!url) return null
+
+          return {
+            url,
+            ...(description ? { description } : {})
+          }
+        }).filter(Boolean)
+
+        if (servers.length === 0) {
+          console.error('No valid servers provided')
+          console.error('Expected format: --servers "https://api.example.com:8080|Production,https://staging.example.com|Staging"')
+          process.exit(1)
+        }
+
+        return servers
+      }, [{ url: 'http://localhost:3000/api', description: 'Development server' }])
 
     // LLM provider options
     .option('-p, --provider <provider>', 'LLM provider (e.g., anthropic, openai)', process.env.LLM_PROVIDER)
@@ -41,7 +66,8 @@ export function initCli(): CliOptions {
       title: options.title,
       version: options.version,
       description: options.description
-    }
+    },
+    servers: options.servers,
   }
 }
 

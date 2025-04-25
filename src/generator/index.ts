@@ -14,7 +14,7 @@ import { OpenAPI } from '@/schemas'
  * @param options - CLI options
  */
 export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
-  const { dir, outputFile, format, provider, model, apiKey, info, routes } = options
+  const { dir, outputFile, format, provider, model, apiKey, info, servers, routes } = options
 
   assert(AVAILABLE_LLM_PROVIDERS.includes(provider as any),
     `Invalid provider "${provider}". Available providers: "${AVAILABLE_LLM_PROVIDERS.join(' | ')}"`)
@@ -78,6 +78,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
         version: info?.version || BASE_OPENAPI_SPEC.info.version,
         description: info?.description || BASE_OPENAPI_SPEC.info.description,
       },
+      servers: servers || [],
       paths: openAPIPaths
     }
 
