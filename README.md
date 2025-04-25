@@ -30,7 +30,7 @@ npm install documentry --save-dev
 You can use `Documentry` directly from the command line:
 
 ```bash
-npx documentry --provider anthropic --api-key your-api-key
+npx documentry --provider provider-name --api-key your-api-key
 ```
 
 *NOTE: Your API key can also be set using a `LLM_PROVIDER_API_KEY` environment variable.*
