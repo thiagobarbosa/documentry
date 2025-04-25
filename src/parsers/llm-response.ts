@@ -1,30 +1,20 @@
-import { GeneratedAPIOperation } from '@/types'
+import { PathItem, ZPathItem } from '@/schemas'
 
 /**
- * Parses Claude's response into the GeneratedAPIOperation structure
+ * Parses the response from the LLM, extracts the JSON object and validates it against the PathItem schema.
+ * @param responseText The raw response text from the LLM.
+ * @return {PathItem} The parsed and validated PathItem object.
+ * @throws {Error} If the response cannot be parsed or does not match the expected schema.
  */
-export const parseLLMResponse = (responseText: string): GeneratedAPIOperation => {
+export const parseLLMResponse = (responseText: string): PathItem => {
   try {
     // Extract JSON if it's wrapped in code blocks or has extra text
     const jsonMatch = responseText.match(/```(?:json)?\s*({[\s\S]*?})\s*```/) ||
       responseText.match(/({[\s\S]*})/)
 
     const jsonText = jsonMatch ? jsonMatch[1] : responseText
-    const parsed = JSON.parse(jsonText) as GeneratedAPIOperation
-
-    return {
-      summary: parsed.summary || 'API endpoint',
-      description: parsed.description || 'No description available',
-      parameters: parsed.parameters,
-      requestBody: parsed.requestBody
-    }
-  } catch (error) {
-    console.error('Error parsing Claude response:', error)
-    console.debug('Raw response:', responseText)
-
-    return {
-      summary: 'API endpoint',
-      description: 'Failed to parse Claude response'
-    }
+    return ZPathItem.parse(JSON.parse(jsonText))
+  } catch (error: any) {
+    throw new Error(error.message)
   }
 }

@@ -33,13 +33,15 @@
   "repository": "https://github.com/thiagobarbosa/documentry",
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.19.0",
+    "@anthropic-ai/sdk": "^0.39.0",
     "commander": "^11.1.0",
     "glob": "^10.4.5",
     "js-yaml": "^4.1.0",
     "openai": "^4.93.0",
     "openapi3-ts": "^4.4.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "zod": "^3.24.3",
+    "zod-to-json-schema": "^3.24.5"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",

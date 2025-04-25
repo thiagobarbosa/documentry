@@ -3,10 +3,10 @@ import assert from 'node:assert'
 import path from 'path'
 import { glob } from 'glob'
 import yaml from 'js-yaml'
-import { OpenAPIObject } from 'openapi3-ts/oas30'
 import { BASE_OPENAPI_SPEC, CliOptions } from '@/types'
 import { AVAILABLE_LLM_PROVIDERS, createLLMService, getDefaultModel } from '@/services/providers/llm-provider'
 import { processAllRoutes } from '@/generator/process-routes'
+import { OpenAPI } from '@/schemas'
 
 /**
  * Generate OpenAPI specifications from Next.js API routes
@@ -43,29 +43,22 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
 
     console.log('✓ Found', routeFiles.length, routeFiles.length > 1 ? 'routes' : 'route')
 
-    // Create a deep copy of the base spec to avoid modifying the original
-    const openAPISpec: OpenAPIObject = JSON.parse(JSON.stringify(BASE_OPENAPI_SPEC))
-    openAPISpec.info = {
-      title: info?.title || openAPISpec.info.title,
-      version: info?.version || openAPISpec.info.version,
-      description: info?.description || openAPISpec.info.description
-    }
-
     // Initialize LLM service
     const llmService = createLLMService(provider, apiKey, model, verbose)
 
     const startTime = Date.now()
-    await processAllRoutes({
+    const openAPIPaths = await processAllRoutes({
       dir,
       routeFiles,
-      openAPISpec,
       llmService,
       provider,
       verbose: verbose || false
     }).catch((err => {
       console.error('Error processing route file:', err)
       errorCount++
+      return {}
     }))
+
     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2)
     console.log('> OpenAPI spec generation completed in', elapsedTime, 'seconds')
 
@@ -78,6 +71,16 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     const outputDir = path.dirname(outputPath)
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true })
+    }
+
+    const openAPISpec: OpenAPI = {
+      openapi: BASE_OPENAPI_SPEC.openapi,
+      info: {
+        title: info?.title || BASE_OPENAPI_SPEC.info.title,
+        version: info?.version || BASE_OPENAPI_SPEC.info.version,
+        description: info?.description || BASE_OPENAPI_SPEC.info.description,
+      },
+      paths: openAPIPaths,
     }
 
     // Write OpenAPI spec to file

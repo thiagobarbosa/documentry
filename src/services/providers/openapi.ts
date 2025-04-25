@@ -1,9 +1,9 @@
 import OpenAI from 'openai'
 import fs from 'fs'
-import { GeneratedAPIOperation } from '@/types'
 import { buildPrompt } from '@/services/prompts'
 import { extractMethodImplementation, parseLLMResponse } from '@/parsers'
 import { LLMService } from '@/services/providers/llm-provider'
+import { PathItem } from '@/schemas'
 
 /**
  * OpenAI service for generating OpenAPI operation details
@@ -26,7 +26,7 @@ export class OpenAIService implements LLMService {
   /**
    * Generates OpenAPI operation details using OpenAI GPT
    */
-  public async generateOperation(filePath: string, httpMethod: string, route: string): Promise<GeneratedAPIOperation> {
+  public async generatePathItem(filePath: string, httpMethod: string, route: string): Promise<PathItem> {
     try {
       const fileContent = fs.readFileSync(filePath, 'utf-8')
 
@@ -34,13 +34,7 @@ export class OpenAIService implements LLMService {
       const methodImplementation = extractMethodImplementation(fileContent, httpMethod)
 
       if (!methodImplementation) {
-        if (this.verbose) {
-          console.log(`Could not find implementation for ${route} method in file: ${filePath}`)
-        }
-        return {
-          summary: `${route} endpoint`,
-          description: 'No detailed description available',
-        }
+        throw new Error(`Could not find implementation for ${route} method in file: ${filePath}`)
       }
 
       const prompt = buildPrompt(route, methodImplementation)

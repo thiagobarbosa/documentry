@@ -1,9 +1,9 @@
 import path from 'path'
 import { convertRouteToPath, getHTTPMethodsFromFile } from '@/parsers'
-import { OpenAPIObject } from 'openapi3-ts/oas30'
+import { Paths } from '@/schemas'
 import { LLMService } from '@/services/providers/llm-provider'
 
-const MAX_CONCURRENCY = 10
+const MAX_CONCURRENCY = 5
 let activePromises = 0
 let queue: Promise<any>[] = []
 
@@ -12,19 +12,18 @@ let queue: Promise<any>[] = []
  * The process is done in parallel with a MAX_CONCURRENCY limit.
  * @param dir Directory containing the route files
  * @param routeFiles Array of route files to process
- * @param openAPISpec OpenAPI specification object to populate
  * @param llmService LLM service instance for generating OpenAPI specs
  * @param provider LLM provider name
  * @param verbose Verbose output flag
  */
-export const processAllRoutes = async ({ dir, routeFiles, openAPISpec, llmService, provider, verbose }: {
+export const processAllRoutes = async ({ dir, routeFiles, llmService, provider, verbose }: {
   dir: string,
   routeFiles: string[],
-  openAPISpec: OpenAPIObject,
   llmService: LLMService,
   provider: string,
   verbose: boolean
-}) => {
+}): Promise<Paths> => {
+  const results: Paths = {}
   for (const [routeIndex, routeFile] of routeFiles.entries()) {
     // Wait if we've reached concurrency limit
     if (activePromises >= MAX_CONCURRENCY) {
@@ -46,31 +45,12 @@ export const processAllRoutes = async ({ dir, routeFiles, openAPISpec, llmServic
 
         console.log('\n> File', routeIndex + 1, '\n', { path: apiPath, numberOfMethods: httpMethods.length })
 
-        // Initialize path in OpenAPI spec
-        if (!openAPISpec.paths[apiPath]) {
-          openAPISpec.paths[apiPath] = {}
-        }
-
         // Process HTTP methods in parallel
         await Promise.all(httpMethods.map(async (method) => {
           const route = `${method.toUpperCase()} ${apiPath}`
           try {
             console.log('Generating specs for', { route })
-            const operation = await llmService.generateOperation(fullPath, method, route)
-
-            // Add to OpenAPI spec
-            openAPISpec.paths[apiPath][method as any] = {
-              summary: operation.summary,
-              description: operation.description,
-              parameters: operation.parameters,
-              requestBody: operation.requestBody,
-              responses: {
-                '200': {
-                  description: 'Successful response'
-                }
-              }
-            }
-
+            results[apiPath] = await llmService.generatePathItem(fullPath, method, route)
             if (verbose) console.log(`"${route}" successfully generated`)
           } catch (error: any) {
             console.error(`Error processing "${route}" with ${provider}:`, error.message, '\n')
@@ -87,4 +67,6 @@ export const processAllRoutes = async ({ dir, routeFiles, openAPISpec, llmServic
 
   // Wait for any remaining tasks
   await Promise.all(queue)
+
+  return results
 }

@@ -1,67 +1,27 @@
+import { ZPathItem } from '@/schemas'
+import { zodToJsonSchema } from 'zod-to-json-schema'
+
+
 /**
  * Builds the prompt for OpenAPI operation spec generation
  */
 export const buildPrompt = (route: string, methodImplementation: string): string => {
+  // Convert the Zod schema to a JSON Schema representation
+  const schemaJson = zodToJsonSchema(ZPathItem, {
+    $refStrategy: 'root',
+    definitionPath: 'components/schemas'
+  })
+
   return `
-    You are generating the OpenAPI documentation for a Next.js API route "${route}":
+    You are generating the OpenAPI documentation for a Next.js API route "${route}".
     This is the TypeScript function implementation:
 
     \`\`\`typescript
     ${methodImplementation}
     \`\`\`
     
-    Return valid JSON only in this format:
-    {
-      "summary": "Concise endpoint purpose (max 10 words)",
-      "description": "Brief explanation of functionality, parameters, and purpose",
-      "requestBody": { // optional; DO NOT include if not present
-        "description": "Description of the request body",
-        "required": true|false,
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "string|number|boolean|array|object|null",
-              "nullable": true|false,
-              "properties": {
-                "propertyName": {
-                  "type": "string|number|boolean|array|object|null",
-                  "nullable": true|false,
-                  "description": "Description of the property",
-                  "items": {...} // in the case of arrays
-                  
-                }
-              }
-            },
-            "example": "example value", // in the case of values that are not objects
-            "examples": { // in the case of values that are objects
-              "exampleName": {
-                "value": "example value",
-                "summary": "example summary"
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "name": "parameterName",
-          "in": "query|header|path|cookie",
-          "required": true|false,
-          "schema": {
-            "type": "string|number|boolean|array|object|null",
-            "nullable": true|false
-          },
-          "example": "example value", // in the case of values that are not objects
-          "examples": { // in the case of values that are objects
-            "exampleName": {
-              "value": "example value",
-              "summary": "example summary",
-              "description": "example description"
-            }
-          }
-        }
-      ]
-    }
+    Return valid JSON only that conforms to the following OpenAPI 3.0 Operation Object schema like this:
+    ${JSON.stringify(schemaJson, null, 2)}
     
     Follow these rules:
     1. Ignore Next.js types (NextRequest, NextResponse)
@@ -69,5 +29,7 @@ export const buildPrompt = (route: string, methodImplementation: string): string
     3. Query parameters: Extracted from URL/searchParams (e.g., searchParams.get('id'))
     4. Path parameters: Found in function signature ({params: {id: string}}) or route path (e.g., '/hotel/{id}/...')
     5. Body parameters: Parsed from request body (e.g., await request.json())
-    6. Check if parameters are required or optional`
+    6. Check if parameters are required or optional
+    7. Do not use any file references (like "$ref: './types.ts#MyType') in the response
+    `
 }

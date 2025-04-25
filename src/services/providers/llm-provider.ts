@@ -1,4 +1,4 @@
-import { GeneratedAPIOperation } from '@/types'
+import { PathItem } from '@/schemas'
 import { AnthropicService } from '@/services/providers/anthropic'
 import { OpenAIService } from '@/services/providers/openapi'
 
@@ -9,12 +9,12 @@ export const AVAILABLE_LLM_PROVIDERS = ['anthropic', 'openai'] as const
  */
 export interface LLMService {
   /**
-   * Generates OpenAPI operation details using a LLM provider
+   * Generates OpenAPI path item details using the LLM
    * @param filePath Absolute path to the API route file
    * @param httpMethod HTTP method (e.g., GET, POST)
    * @param route API route (e.g., /api/users)
    */
-  generateOperation(filePath: string, httpMethod: string, route: string): Promise<GeneratedAPIOperation>
+  generatePathItem(filePath: string, httpMethod: string, route: string): Promise<PathItem>
 }
 
 /**
