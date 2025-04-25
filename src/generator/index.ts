@@ -55,7 +55,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     })
 
     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2)
-    console.log('> OpenAPI spec generation completed in', elapsedTime, 'seconds')
+    console.info('\nOpenAPI spec generation completed in', elapsedTime, 'seconds')
 
     if (errorCount === routeFiles.length) {
       console.error('Failed to generate OpenAPI specs. Please check the logs for details.')
@@ -75,7 +75,7 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
         version: info?.version || BASE_OPENAPI_SPEC.info.version,
         description: info?.description || BASE_OPENAPI_SPEC.info.description,
       },
-      paths: openAPIPaths,
+      paths: openAPIPaths
     }
 
     // Write OpenAPI spec to file

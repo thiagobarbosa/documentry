@@ -72,7 +72,7 @@ const ZOperation = z.object({
   summary: z.string().describe('Concise endpoint purpose (max 10 words)'),
   description: z.string().describe('Brief explanation of functionality, parameters, and purpose'),
   parameters: z.array(ZParameter).optional(),
-  requestBody: z.lazy(() => ZRequestBody).optional().describe('Request body schema; ignore this field for DELETE or GET requests'),
+  requestBody: z.lazy(() => ZRequestBody).optional().describe('Request body schema'),
   responses: z.record(z.string(), ZResponse),
   tags: z.array(z.string()).optional().describe('Tag for grouping endpoints, all lowered case; use only one tag per endpoint')
 })

@@ -22,14 +22,5 @@ export const buildPrompt = (route: string, methodImplementation: string): string
     
     Return valid JSON only that conforms to the following OpenAPI 3.0 Operation Object schema like this:
     ${JSON.stringify(schemaJson, null, 2)}
-    
-    Follow these rules:
-    1. Ignore Next.js types (NextRequest, NextResponse)
-    2. Analyze function code for used parameters
-    3. Functions using "searchParams" (e.g., searchParams.get('id')) must be considered having QUERY parameters
-    4. Function signature like ({params: {id: string}}) or route path (e.g., '/hotel/{id}/...') must be considered having PATH parameters
-    5. Body parameters: Parsed from request body (e.g., await request.json())
-    6. Check if parameters are required or optional
-    7. Do not use any file references (like "$ref: './types.ts#MyType') in the response
     `
 }
