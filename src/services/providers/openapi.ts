@@ -2,7 +2,7 @@ import OpenAI from 'openai'
 import fs from 'fs'
 import { buildPrompt } from '@/services/prompts'
 import { extractMethodImplementation, parseLLMResponse } from '@/parsers'
-import { LLMService } from '@/services/providers/llm-provider'
+import { getDefaultModel, LLMService } from '@/services/providers/llm-provider'
 import { PathItem } from '@/schemas'
 
 /**
@@ -13,14 +13,12 @@ import { PathItem } from '@/schemas'
 export class OpenAIService implements LLMService {
   private client: OpenAI
   private readonly model: string
-  private readonly verbose: boolean
 
-  constructor(apiKey?: string, model = 'gpt-4o-mini', verbose = false) {
+  constructor(apiKey: string, model: string) {
     this.client = new OpenAI({
       apiKey: apiKey || process.env.OPENAI_API_KEY
     })
-    this.model = model
-    this.verbose = verbose
+    this.model = model || getDefaultModel('openai')
   }
 
   /**
@@ -42,6 +40,7 @@ export class OpenAIService implements LLMService {
         model: this.model,
         max_tokens: 1000,
         top_p: 0.8,
+        response_format: { type: 'json_object' },
         messages: [
           {
             role: 'user',

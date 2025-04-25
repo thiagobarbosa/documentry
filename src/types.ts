@@ -5,7 +5,6 @@ export interface CliOptions {
   dir: string
   outputFile: string
   format: 'yaml' | 'json'
-  verbose?: boolean
   provider: typeof AVAILABLE_LLM_PROVIDERS[number]
   model: string
   apiKey: string

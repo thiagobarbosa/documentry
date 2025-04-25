@@ -14,7 +14,7 @@ import { OpenAPI } from '@/schemas'
  * @param options - CLI options
  */
 export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
-  const { dir, outputFile, format, verbose, provider, model, apiKey, info } = options
+  const { dir, outputFile, format, provider, model, apiKey, info } = options
 
   assert(AVAILABLE_LLM_PROVIDERS.includes(provider as any),
     `Invalid provider "${provider}". Available providers: "${AVAILABLE_LLM_PROVIDERS.join(' | ')}"`)
@@ -44,20 +44,15 @@ export async function generateOpenAPISpecs(options: CliOptions): Promise<void> {
     console.log('✓ Found', routeFiles.length, routeFiles.length > 1 ? 'routes' : 'route')
 
     // Initialize LLM service
-    const llmService = createLLMService(provider, apiKey, model, verbose)
+    const llmService = createLLMService(provider, apiKey, model)
 
     const startTime = Date.now()
     const openAPIPaths = await processAllRoutes({
       dir,
       routeFiles,
       llmService,
-      provider,
-      verbose: verbose || false
-    }).catch((err => {
-      console.error('Error processing route file:', err)
-      errorCount++
-      return {}
-    }))
+      provider
+    })
 
     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2)
     console.log('> OpenAPI spec generation completed in', elapsedTime, 'seconds')

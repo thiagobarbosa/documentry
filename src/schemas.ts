@@ -36,12 +36,12 @@ const ZSchemaObject: z.ZodType<SchemaType> = z.lazy(() =>
     }),
     z.object({
       type: z.literal('object'),
-      properties: z.record(z.string(), ZSchema).optional(),
+      properties: z.record(z.string(), ZSchemaObject).optional(),
       required: z.array(z.string()).optional(),
     }),
     z.object({
       type: z.literal('array'),
-      items: ZSchema,
+      items: ZSchemaObject,
     }),
   ])
 )
@@ -72,9 +72,9 @@ const ZOperation = z.object({
   summary: z.string().describe('Concise endpoint purpose (max 10 words)'),
   description: z.string().describe('Brief explanation of functionality, parameters, and purpose'),
   parameters: z.array(ZParameter).optional(),
-  requestBody: z.lazy(() => ZRequestBody).optional(),
+  requestBody: z.lazy(() => ZRequestBody).optional().describe('Request body schema; ignore this field for DELETE or GET requests'),
   responses: z.record(z.string(), ZResponse),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional().describe('Tag for grouping endpoints, all lowered case; use only one tag per endpoint')
 })
 
 const ZPathItem = z.object({

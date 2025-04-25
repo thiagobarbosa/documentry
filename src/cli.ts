@@ -14,7 +14,6 @@ export function initCli(): CliOptions {
     .option('--dir <directory>', 'Directory containing API routes', './app/api')
     .option('-o, --output-file <file>', 'Output file for OpenAPI specs', 'openapi')
     .option('-f, --format <format>', 'Output format (yaml or json)', 'yaml')
-    .option('--verbose', 'Verbose output')
 
     // OpenAPI spec options
     .option('-t, --title <title>', 'Title for the OpenAPI spec')
@@ -33,7 +32,6 @@ export function initCli(): CliOptions {
     dir: path.resolve(process.cwd(), options.dir),
     outputFile: path.resolve(process.cwd(), options.outputFile),
     format: options.format,
-    verbose: options.verbose,
     provider: options.provider,
     model: options.model,
     apiKey: options.apiKey,

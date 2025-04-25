@@ -3,7 +3,7 @@ import { convertRouteToPath, getHTTPMethodsFromFile } from '@/parsers'
 import { Paths } from '@/schemas'
 import { LLMService } from '@/services/providers/llm-provider'
 
-const MAX_CONCURRENCY = 10
+const MAX_CONCURRENCY = 5
 let activePromises = 0
 let queue: Promise<any>[] = []
 
@@ -14,14 +14,12 @@ let queue: Promise<any>[] = []
  * @param routeFiles Array of route files to process
  * @param llmService LLM service instance for generating OpenAPI specs
  * @param provider LLM provider name
- * @param verbose Verbose output flag
  */
-export const processAllRoutes = async ({ dir, routeFiles, llmService, provider, verbose }: {
+export const processAllRoutes = async ({ dir, routeFiles, llmService, provider }: {
   dir: string,
   routeFiles: string[],
   llmService: LLMService,
   provider: string,
-  verbose: boolean
 }): Promise<Paths> => {
   const results: Paths = {}
   for (const [routeIndex, routeFile] of routeFiles.entries()) {
@@ -36,22 +34,21 @@ export const processAllRoutes = async ({ dir, routeFiles, llmService, provider, 
       try {
         const fullPath = path.join(dir, routeFile)
         const apiPath = convertRouteToPath(routeFile)
-        const httpMethods = getHTTPMethodsFromFile(fullPath, verbose)
+        const httpMethods = getHTTPMethodsFromFile(fullPath)
 
         if (httpMethods.length === 0) {
-          if (verbose) console.log(`No HTTP methods found for ${apiPath}`)
+          console.warn(`No HTTP methods found for ${apiPath}`)
           return
         }
 
-        console.log('\n> File', routeIndex + 1, '\n', { path: apiPath, numberOfMethods: httpMethods.length })
+        console.log('\n> Processing file', routeIndex + 1)
+        console.log({ path: apiPath, methods: httpMethods.join(', ') })
 
         // Process HTTP methods in parallel
         await Promise.all(httpMethods.map(async (method) => {
           const route = `${method.toUpperCase()} ${apiPath}`
           try {
-            console.log('Generating specs for', { route })
             results[apiPath] = await llmService.generatePathItem(fullPath, method, route)
-            if (verbose) console.log(`"${route}" successfully generated`)
           } catch (error: any) {
             console.error(`Error processing "${route}" with ${provider}:`, error.message, '\n')
           }

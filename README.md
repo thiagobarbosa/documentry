@@ -47,7 +47,6 @@ await generateOpenAPISpecs({
   dir: './app/api',
   outputFile: './docs/openapi',
   format: 'yaml',
-  verbose: true,
   provider: 'anthropic',
   model: 'claude-3-5-sonnet-latest',
   apiKey: 'your-api-key',
@@ -66,7 +65,6 @@ await generateOpenAPISpecs({
 | `--dir <directory>`               | Directory containing your Nextjs API routes (`./app/api`, `./src/app/api`, etc) | `./app/api`                                 |
 | `-o, --output-file <file>`        | Output folder/file for the generated OpenAPI specs                              | `./docs/openapi`                            |
 | `-f, --format`                    | The format for the generated OpenAPI file (either `yaml` or `json`              | `yaml`                                      |
-| `--verbose`                       | Verbose output                                                                  | `false`                                     |
 | `-t, --title <title>`             | Title for the OpenAPI spec                                                      | `Next.js API`                               |
 | `-d, --description <description>` | Description for the OpenAPI spec                                                | `API documentation for Next.js routes`      |
 | `-v, --version <version>`         | Version for the OpenAPI spec                                                    | `1.0.0`                                     |

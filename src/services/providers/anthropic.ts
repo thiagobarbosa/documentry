@@ -2,7 +2,7 @@ import fs from 'fs'
 import { Anthropic } from '@anthropic-ai/sdk'
 import { buildPrompt } from '@/services/prompts'
 import { extractMethodImplementation, parseLLMResponse } from '@/parsers'
-import { LLMService } from '@/services/providers/llm-provider'
+import { getDefaultModel, LLMService } from '@/services/providers/llm-provider'
 import { PathItem } from '@/schemas'
 
 /**
@@ -13,14 +13,12 @@ import { PathItem } from '@/schemas'
 export class AnthropicService implements LLMService {
   private client: Anthropic
   private readonly model: string
-  private readonly verbose: boolean
 
-  constructor(apiKey?: string, model = 'claude-3-5-sonnet-latest', verbose = false) {
+  constructor(apiKey: string, model: string) {
     this.client = new Anthropic({
       apiKey: apiKey || process.env.ANTHROPIC_API_KEY
     })
-    this.model = model
-    this.verbose = verbose
+    this.model = model || getDefaultModel('anthropic')
   }
 
   /**

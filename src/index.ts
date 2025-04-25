@@ -1,6 +1,7 @@
 import { runCli } from './cli'
 import { generateOpenAPISpecs } from './generator'
 import { AnthropicService } from '@/services/providers/anthropic'
+import { OpenAIService } from './services/providers/openapi'
 
 // Check if this is being run as a CLI
 const isCli = process.argv[1]?.endsWith('documentry') ||
@@ -13,5 +14,6 @@ if (isCli) {
 
 export {
   generateOpenAPISpecs,
-  AnthropicService
+  AnthropicService,
+  OpenAIService,
 }
