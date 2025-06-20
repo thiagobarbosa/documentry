@@ -12,7 +12,10 @@
     "build": "tsup",
     "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [
     "openapi",
@@ -45,8 +48,11 @@
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
+    "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.17.30",
+    "jest": "^30.0.2",
+    "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.4.0",
     "tsx": "^4.7.1"
