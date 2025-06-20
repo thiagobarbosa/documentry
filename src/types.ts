@@ -5,7 +5,7 @@ import { Info, Servers } from '@/schemas'
 export interface CliOptions {
   dir: string
   outputFile: string
-  format: 'yaml' | 'json'
+  format: 'yaml' | 'json' | 'html'
   provider: typeof AVAILABLE_LLM_PROVIDERS[number]
   model: string
   apiKey: string

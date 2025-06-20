@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Documentry is a AI-powered Typescript library that uses LLM models to understand your Next.js API routes and
-automatically generate detailed OpenAPI documentation - both as `json` and `yaml`.
+automatically generate detailed OpenAPI documentation in multiple formats: `json`, `yaml`, and interactive `html`.
 
 With a single terminal command, `Documentry` scans every API route in your Next.js project,
 understand the actual code of your `route.ts` files, and generates a valid `OpenAPI Specification (OAS)` file that
@@ -14,7 +14,7 @@ describes your endpoints.
 
 - 🚀 Automatically scams your project and detects your Next.js API routes
 - 🧠 Uses AI to understand the actual code of your routes
-- 📝 Creates `OpenAPI 3.0` specifications in `json` or `yaml` format
+- 📝 Creates `OpenAPI 3.0` specifications in `json`, `yaml`, or interactive `html` format
 - 🔄 Currently supports OpenAI and Anthropic models
 
 ## Installation
@@ -30,12 +30,21 @@ npm install documentry --save-dev
 You can use `Documentry` directly from the command line:
 
 ```bash
-npx documentry --provider provider-name --api-key your-api-key
-# To control which routes to process:
-npx documentry --provider provider-name --api-key your-api-key --routes "/user,/products/*"
+# Generate YAML documentation (default)
+npx documentry --provider anthropic
+
+# Generate JSON documentation
+npx documentry --provider anthropic --format json
+
+# Generate interactive HTML documentation (from Swagger UI)
+npx documentry --provider anthropic --format html
+
+# Control which routes to process
+npx documentry --provider anthropic --routes "/user,/products/*"
 ```
 
-*NOTE: Your API key can also be set using a `LLM_PROVIDER_API_KEY` environment variable.*
+*NOTE: Your API key can also be set using a `LLM_PROVIDER_API_KEY` environment variable or passing it directly in the
+command line with `--api-key your-api-key`.*
 
 ### API
 
@@ -49,7 +58,7 @@ await generateOpenAPISpecs({
   dir: './app/api',
   routes: ['/user', '/products/*'],
   outputFile: './docs/openapi',
-  format: 'yaml',
+  format: 'html', // 'yaml', 'json', or 'html'
   provider: 'anthropic',
   model: 'claude-3-5-sonnet-latest',
   apiKey: 'your-api-key',
@@ -79,7 +88,7 @@ await generateOpenAPISpecs({
 | `--routes <routes>`               | List of routes to process (e.g., "/user,/products/*")                         | All routes are considered                   |
 | `--servers <servers>`             | List of server URLs (e.g. "url1\|description1, url2...")                      | URL: `http://localhost:3000/api`            |
 | `-o, --output-file <file>`        | Output folder/file for the generated OpenAPI specs                            | `./docs/openapi`                            |
-| `-f, --format`                    | The format for the generated OpenAPI file (either `yaml` or `json`            | `yaml`                                      |
+| `-f, --format`                    | The format for the generated OpenAPI file (`yaml`, `json`, or `html`)         | `yaml`                                      |
 | `-t, --title <title>`             | Title for the OpenAPI spec                                                    | `Next.js API`                               |
 | `-d, --description <description>` | Description for the OpenAPI spec                                              | `API documentation for Next.js routes`      |
 | `-v, --version <version>`         | Version for the OpenAPI spec                                                  | `1.0.0`                                     |

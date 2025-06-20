@@ -13,7 +13,7 @@ export function initCli(): CliOptions {
     .description('Automatically generate OpenAPI specs from Next.js API routes using LLM models.')
     .option('--dir <directory>', 'Directory containing API routes', './app/api')
     .option('-o, --output-file <file>', 'Output file for OpenAPI specs', 'openapi')
-    .option('-f, --format <format>', 'Output format (yaml or json)', 'yaml')
+    .option('-f, --format <format>', 'Output format (yaml, json, or html)', 'yaml')
     .option('--routes <routes>', 'Comma-separated list of routes to process (e.g., /user,/products/*)', (value) => value.split(','))
 
     // OpenAPI spec options
