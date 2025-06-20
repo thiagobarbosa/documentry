@@ -12,6 +12,7 @@ export default defineConfig([
     clean: true,
     treeshake: true,
     outDir: 'dist/lib',
+    publicDir: 'src/lib/generator',
     esbuildOptions(options) {
       options.alias = {
         '@': path.resolve(__dirname, './src')

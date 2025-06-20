@@ -1,6 +1,7 @@
 import fs from 'fs'
 import assert from 'node:assert'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { glob } from 'glob'
 import yaml from 'js-yaml'
 import { BASE_OPENAPI_SPEC, CliOptions } from '@/lib/types'
@@ -13,23 +14,24 @@ import { OpenAPI } from '@/lib/schemas'
  */
 function generateSwaggerUIPage(openAPISpec: OpenAPI): string {
   const specJson = JSON.stringify(openAPISpec, null, 2)
-  const templatesDir = path.join(__dirname, 'templates')
-  
+  const __filename = fileURLToPath(import.meta.url)
+  const distDir = path.dirname(__filename)
+
   // Read template files
-  const htmlTemplate = fs.readFileSync(path.join(templatesDir, 'swagger-ui.html'), 'utf-8')
-  const cssContent = fs.readFileSync(path.join(templatesDir, 'swagger-ui-dark.css'), 'utf-8')
-  
+  const htmlTemplate = fs.readFileSync(path.join(distDir, 'lib/templates/swagger-ui.html'), 'utf-8')
+  const cssContent = fs.readFileSync(path.join(distDir, 'lib/templates/swagger-ui-dark.css'), 'utf-8')
+
   // Replace placeholders in HTML template
   let html = htmlTemplate
     .replace('{{TITLE}}', openAPISpec.info.title)
     .replace('{{SPEC_JSON}}', specJson)
-  
+
   // Inline the CSS content instead of external link
   html = html.replace(
     '<link href="./swagger-ui-dark.css" rel="stylesheet" type="text/css" />',
     `<style>\n${cssContent}\n</style>`
   )
-  
+
   return html
 }
 
