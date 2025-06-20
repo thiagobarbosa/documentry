@@ -1,5 +1,5 @@
-import { AVAILABLE_LLM_PROVIDERS } from '@/services/providers/llm-provider'
-import { Info, Servers } from '@/schemas'
+import { AVAILABLE_LLM_PROVIDERS } from '@/lib/services/providers/llm-provider'
+import { Info, Servers } from '@/lib/schemas'
 
 // CLI options
 export interface CliOptions {

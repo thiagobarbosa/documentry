@@ -1,8 +1,22 @@
 import path from 'path'
 import { program } from 'commander'
-import { CliOptions } from './types'
-import { generateOpenAPISpecs } from './generator'
+import { config } from 'dotenv'
+import { CliOptions } from '@/lib/types'
+import { generateOpenAPISpecs } from '@/lib'
 import * as process from 'node:process'
+
+// Load environment variables from the user's project directory
+// Try multiple common .env file patterns
+const envPaths = [
+  path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), '.env.local'),
+  path.resolve(process.cwd(), '.env.development'),
+  path.resolve(process.cwd(), '.env.dev')
+]
+
+for (const envPath of envPaths) {
+  config({ path: envPath })
+}
 
 /**
  * Initialize CLI for the OpenAPI generator

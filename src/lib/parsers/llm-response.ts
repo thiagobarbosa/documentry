@@ -1,4 +1,4 @@
-import { PathItem, ZPathItem } from '@/schemas'
+import { PathItem, ZPathItem } from '@/lib/schemas'
 
 /**
  * Parses the response from the LLM, extracts the JSON object and validates it against the PathItem schema.

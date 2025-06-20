@@ -1,8 +1,8 @@
 import path from 'path'
 import fs from 'fs'
-import { convertRouteToPath } from '@/parsers'
-import { Paths } from '@/schemas'
-import { LLMService } from '@/services/providers/llm-provider'
+import { convertRouteToPath } from '@/lib/parsers'
+import { Paths } from '@/lib/schemas'
+import { LLMService } from '@/lib/services/providers/llm-provider'
 
 const MAX_CONCURRENCY = 5
 

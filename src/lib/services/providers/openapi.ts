@@ -1,28 +1,28 @@
+import OpenAI from 'openai'
 import fs from 'fs'
-import { Anthropic } from '@anthropic-ai/sdk'
-import { buildPrompt } from '@/services/prompts'
-import { extractMethodImplementation, parseLLMResponse } from '@/parsers'
-import { getDefaultModel, LLMService } from '@/services/providers/llm-provider'
-import { PathItem } from '@/schemas'
+import { buildPrompt } from '@/lib/services/prompts'
+import { extractMethodImplementation, parseLLMResponse } from '@/lib/parsers'
+import { getDefaultModel, LLMService } from '@/lib/services/providers/llm-provider'
+import { PathItem } from '@/lib/schemas'
 
 /**
- * Anthropic service for generating OpenAPI operation details
+ * OpenAI service for generating OpenAPI operation details
  *
- * @class AnthropicService
+ * @class OpenAIService
  */
-export class AnthropicService implements LLMService {
-  private client: Anthropic
+export class OpenAIService implements LLMService {
+  private client: OpenAI
   private readonly model: string
 
   constructor(apiKey: string, model: string) {
-    this.client = new Anthropic({
-      apiKey: apiKey || process.env.ANTHROPIC_API_KEY
+    this.client = new OpenAI({
+      apiKey: apiKey || process.env.OPENAI_API_KEY
     })
-    this.model = model || getDefaultModel('anthropic')
+    this.model = model || getDefaultModel('openai')
   }
 
   /**
-   * Generates OpenAPI operation details using Claude
+   * Generates OpenAPI operation details using OpenAI GPT
    */
   public async generatePathItem(filePath: string, httpMethod: string, route: string): Promise<PathItem> {
     try {
@@ -36,10 +36,11 @@ export class AnthropicService implements LLMService {
       }
 
       const prompt = buildPrompt(route, methodImplementation)
-      const response = await this.client.messages.create({
+      const response = await this.client.chat.completions.create({
         model: this.model,
         max_tokens: 1000,
         top_p: 0.8,
+        response_format: { type: 'json_object' },
         messages: [
           {
             role: 'user',
@@ -48,13 +49,11 @@ export class AnthropicService implements LLMService {
         ]
       })
 
-      const text = 'text' in response.content[0] ? response.content[0].text : ''
+      const text = response.choices[0]?.message?.content || ''
 
       return parseLLMResponse(text)
     } catch (error: any) {
       throw new Error(error.message)
     }
   }
-
-
 }

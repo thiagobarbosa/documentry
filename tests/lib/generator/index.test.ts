@@ -2,9 +2,9 @@ import fs from 'fs'
 import path from 'path'
 import yaml from 'js-yaml'
 import { glob } from 'glob'
-import { generateOpenAPISpecs } from '../index'
-import { CliOptions } from '@/types'
-import { processAllRoutes } from '../process-routes'
+import { generateOpenAPISpecs } from '../../../src/lib/generator'
+import { CliOptions } from '../../../src/lib/types'
+import { processAllRoutes } from '../../../src/lib/generator/process-routes'
 // Test utilities and mocks
 const mockCliOptions: CliOptions = {
   dir: '/test/api',
@@ -90,8 +90,8 @@ jest.mock('path')
 jest.mock('glob', () => ({
   glob: jest.fn()
 }))
-jest.mock('../process-routes')
-jest.mock('@/services/providers/llm-provider', () => ({
+jest.mock('../../../src/lib/generator/process-routes')
+jest.mock('../../../src/lib/services/providers/llm-provider', () => ({
   AVAILABLE_LLM_PROVIDERS: ['anthropic', 'openai'],
   createLLMService: jest.fn(),
   getDefaultModel: jest.fn().mockReturnValue('claude-3-5-sonnet-latest')

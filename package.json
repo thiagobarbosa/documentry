@@ -3,10 +3,20 @@
   "description": "AI-powered OpenAPI documentation generator for Next.js applications.",
   "version": "0.0.8",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/lib/index.js",
+  "types": "dist/lib/index.d.ts",
   "bin": {
     "documentry": "dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/lib/index.js",
+      "types": "./dist/lib/index.d.ts"
+    },
+    "./cli": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
   "scripts": {
     "build": "tsup",
@@ -38,6 +48,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "commander": "^11.1.0",
+    "dotenv": "^16.5.0",
     "glob": "^10.4.5",
     "js-yaml": "^4.1.0",
     "openai": "^4.93.0",
@@ -47,6 +58,7 @@
     "zod-to-json-schema": "^3.24.5"
   },
   "devDependencies": {
+    "@types/dotenv": "^6.1.1",
     "@types/glob": "^8.1.0",
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",

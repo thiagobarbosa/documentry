@@ -1,4 +1,4 @@
-import { ZPathItem } from '@/schemas'
+import { ZPathItem } from '@/lib/schemas'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 
 

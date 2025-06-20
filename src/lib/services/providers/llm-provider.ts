@@ -1,6 +1,6 @@
-import { PathItem } from '@/schemas'
-import { AnthropicService } from '@/services/providers/anthropic'
-import { OpenAIService } from '@/services/providers/openapi'
+import { PathItem } from '@/lib/schemas'
+import { AnthropicService } from '@/lib/services/providers/anthropic'
+import { OpenAIService } from '@/lib/services/providers/openapi'
 
 export const AVAILABLE_LLM_PROVIDERS = ['anthropic', 'openai'] as const
 
