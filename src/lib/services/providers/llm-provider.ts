@@ -1,6 +1,4 @@
 import { PathItem } from '@/lib/schemas'
-import { AnthropicService } from '@/lib/services/providers/anthropic'
-import { OpenAIService } from '@/lib/services/providers/openapi'
 
 export const AVAILABLE_LLM_PROVIDERS = ['anthropic', 'openai'] as const
 
@@ -23,16 +21,20 @@ export interface LLMService {
  * @param apiKey API key for the LLM provider
  * @param model The model name (e.g., `claude-3-5-sonnet-latest`, `gpt-4o-mini`)
  */
-export function createLLMService(
+export async function createLLMService(
   provider: typeof AVAILABLE_LLM_PROVIDERS[number],
   apiKey: string,
   model: string
-): LLMService {
+): Promise<LLMService> {
   switch (provider) {
-    case 'anthropic':
+    case 'anthropic': {
+      const { AnthropicService } = await import('@/lib/services/providers/anthropic')
       return new AnthropicService(apiKey, model)
-    case 'openai':
+    }
+    case 'openai': {
+      const { OpenAIService } = await import('@/lib/services/providers/openapi')
       return new OpenAIService(apiKey, model)
+    }
     default:
       throw new Error(`Unsupported LLM provider: ${provider}`)
   }

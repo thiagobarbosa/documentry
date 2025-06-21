@@ -45,7 +45,7 @@ export class Documentry {
       }
 
       // Initialize LLM service
-      const llmService = createLLMService(provider, apiKey, model)
+      const llmService = await createLLMService(provider, apiKey, model)
 
       const startTime = Date.now()
       const openAPIPaths = await processAllRoutes({

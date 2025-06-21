@@ -2,20 +2,24 @@ import { defineConfig } from 'tsup'
 import path from 'path'
 
 export default defineConfig([
-  // Main library build
+  // Main library build  
   {
     entry: ['src/lib/index.ts'],
     format: ['esm'],
-    dts: true,
+    dts: false,
     splitting: false,
-    sourcemap: true,
+    sourcemap: false,
     clean: true,
     treeshake: true,
+    minify: true,
     outDir: 'dist/lib',
-    publicDir: 'src/lib/generator',
+    publicDir: 'src/lib/generator/swagger/templates',
     esbuildOptions(options) {
       options.alias = {
         '@': path.resolve(__dirname, './src')
+      }
+      options.define = {
+        'process.env.NODE_ENV': '"production"'
       }
     },
   },
@@ -23,14 +27,18 @@ export default defineConfig([
   {
     entry: ['src/index.ts'],
     format: ['esm'],
-    dts: true,
+    dts: false,
     splitting: false,
-    sourcemap: true,
+    sourcemap: false,
     treeshake: true,
+    minify: true,
     outDir: 'dist',
     esbuildOptions(options) {
       options.alias = {
         '@': path.resolve(__dirname, './src')
+      }
+      options.define = {
+        'process.env.NODE_ENV': '"production"'
       }
     },
     banner: {
