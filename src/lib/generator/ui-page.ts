@@ -22,7 +22,7 @@ export const generateSwaggerUIPage = (openAPISpec: OpenAPI): string => {
 
   // Inline the CSS content instead of external link
   html = html.replace(
-    '<link href="swagger-ui.css" rel="stylesheet" type="text/css" />',
+    '<link href="./swagger-ui.css" rel="stylesheet" type="text/css" />',
     `<style>\n${cssContent}\n</style>`
   )
 

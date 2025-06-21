@@ -7,7 +7,7 @@ import { BASE_OPENAPI_SPEC, CliOptions } from '@/lib/types'
 import { AVAILABLE_LLM_PROVIDERS, createLLMService, getDefaultModel } from '@/lib/services/providers/llm-provider'
 import { processAllRoutes } from '@/lib/generator/process-routes'
 import { OpenAPI } from '@/lib/schemas'
-import { generateSwaggerUIPage } from '@/lib/generator/swagger/ui-page'
+import { generateSwaggerUIPage } from '@/lib/generator/ui-page'
 import { createLogger } from '@/lib/utils/logger'
 
 export class Documentry {
