@@ -75,6 +75,11 @@ const documentry = new Documentry({
 await documentry.generate()
 ```
 
+An example of the generated OpenAPI documentation in HTML format:
+
+![openapi.png](openapi.png)
+
+
 </details>
 
 
