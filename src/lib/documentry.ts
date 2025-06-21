@@ -24,7 +24,7 @@ export class Documentry {
       assert(AVAILABLE_LLM_PROVIDERS.includes(provider as any),
         `Invalid provider "${provider}". Available providers: "${AVAILABLE_LLM_PROVIDERS.join(' | ')}"`)
 
-      assert(apiKey, 'API key is required. Please set the LLM_PROVIDER_API_KEY environment variable or use --api-key option.')
+      assert(apiKey, `API key is required. Please set the ${provider === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY'} environment variable or use --api-key option.`)
 
       assert(format === 'yaml' || format === 'json' || format === 'html', 'Invalid format. Available formats: "yaml" | "json" | "html"')
 

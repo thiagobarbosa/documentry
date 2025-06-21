@@ -50,7 +50,7 @@ await documentry.generate()
 const documentry = new Documentry({
   provider: 'anthropic',
   model: 'claude-3-5-sonnet-latest',
-  apiKey: process.env.LLM_PROVIDER_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY,
   dir: './app/api',
   routes: ['/user', '/products/*'],
   outputFile: './docs/openapi',
@@ -85,41 +85,34 @@ An example of the generated OpenAPI documentation in HTML format:
 
 More examples can be found in the [examples](src/examples) directory.
 
-## Environment variables
+## Environment Variables
 
 You can configure the LLM settings with an `.env` file:
 
 ```bash
-export LLM_PROVIDER=your-llm-provider # openai or anthropic; defaults to anthropic
-export LLM_MODEL=your-llm-model # defaults to claude-3-5-sonnet-latest
-export LLM_PROVIDER_API_KEY=your-api-key
+LLM_PROVIDER=your-llm-provider # openai or anthropic; defaults to anthropic
+LLM_MODEL=your-llm-model # defaults to claude-3-5-sonnet-latest
+ANTHROPIC_API_KEY=your-anthropic-key
+OPENAI_API_KEY=your-openai-key
 ```
 
 ## Configuration Options
 
 The CLI usage supports the following options:
 
-| Flag                              | Description                                                                   | Default                                     |
-|-----------------------------------|-------------------------------------------------------------------------------|---------------------------------------------|
-| `--dir <directory>`               | Root directory for your Nextjs API routes (`./app/api`, `./src/app/api`, etc) | `./app/api`                                 |
-| `--routes <routes>`               | List of routes to process (e.g., "/user,/products/*")                         | All routes are considered                   |
-| `--servers <servers>`             | List of server URLs (e.g. "url1\|description1, url2...")                      | URL: `http://localhost:3000/api`            |
-| `-o, --output-file <file>`        | Output folder/file for the generated OpenAPI specs                            | `./docs/openapi`                            |
-| `-f, --format`                    | The format for the generated OpenAPI file (`yaml`, `json`, or `html`)         | `yaml`                                      |
-| `-t, --title <title>`             | Title for the OpenAPI spec                                                    | `Next.js API`                               |
-| `-d, --description <description>` | Description for the OpenAPI spec                                              | `API documentation for Next.js routes`      |
-| `-v, --version <version>`         | Version for the OpenAPI spec                                                  | `1.0.0`                                     |
-| `-p, --provider <provider>`       | LLM provider (`anthropic` or `openai`)                                        | Environment variable `LLM_PROVIDER`         |
-| `-m, --model <model>`             | LLM model to use                                                              | Environment variable `LLM_MODEL`            |
-| `-k, --api-key <key>`             | LLM provider API key                                                          | Environment variable `LLM_PROVIDER_API_KEY` |
-
-## Environment Variables
-
-You can also configure the tool using environment variables:
-
-- `LLM_PROVIDER`: The LLM provider to use (`anthropic` or `openai`)
-- `LLM_MODEL`: The LLM model to use
-- `LLM_PROVIDER_API_KEY`: Your API key for the LLM provider
+| Flag                              | Description                                                                   | Default                                                                         |
+|-----------------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| `--dir <directory>`               | Root directory for your Nextjs API routes (`./app/api`, `./src/app/api`, etc) | `./app/api`                                                                     |
+| `--routes <routes>`               | List of routes to process (e.g., "/user,/products/*")                         | All routes are considered                                                       |
+| `--servers <servers>`             | List of server URLs (e.g. "url1\|description1, url2...")                      | URL: `http://localhost:3000/api`                                                |
+| `-o, --output-file <file>`        | Output folder/file for the generated OpenAPI specs                            | `./docs/openapi`                                                                |
+| `-f, --format`                    | The format for the generated OpenAPI file (`yaml`, `json`, or `html`)         | `yaml`                                                                          |
+| `-t, --title <title>`             | Title for the OpenAPI spec                                                    | `Next.js API`                                                                   |
+| `-d, --description <description>` | Description for the OpenAPI spec                                              | `API documentation for Next.js routes`                                          |
+| `-v, --version <version>`         | Version for the OpenAPI spec                                                  | `1.0.0`                                                                         |
+| `-p, --provider <provider>`       | LLM provider (`anthropic` or `openai`)                                        | Env variable `LLM_PROVIDER`                                                     |
+| `-m, --model <model>`             | LLM model to use                                                              | Env variable `LLM_MODEL`                                                        |
+| `-k, --api-key <key>`             | LLM provider API key                                                          | Env variable `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`, according to the provider |
 
 ## Development
 

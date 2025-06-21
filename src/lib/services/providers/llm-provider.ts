@@ -55,3 +55,19 @@ export const getDefaultModel = (provider: string): string => {
       throw new Error(`Unsupported LLM provider: ${provider}`)
   }
 }
+
+/**
+ * Get the API key for a given LLM provider from environment variables
+ * @param provider The LLM provider (e.g., `anthropic`, `openai`)
+ * @return The API key from the appropriate environment variable
+ */
+export const getProviderApiKey = (provider: string): string | undefined => {
+  switch (provider) {
+    case 'anthropic':
+      return process.env.ANTHROPIC_API_KEY
+    case 'openai':
+      return process.env.OPENAI_API_KEY
+    default:
+      return undefined
+  }
+}

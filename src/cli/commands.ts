@@ -4,6 +4,7 @@ import { config } from 'dotenv'
 import { CliOptions } from '@/lib/types'
 import { generateOpenAPISpecs } from '@/lib'
 import * as process from 'node:process'
+import { getProviderApiKey } from '@/lib/services/providers/llm-provider'
 
 // Load environment variables from the user's project directory
 // Try multiple common .env file patterns
@@ -63,10 +64,20 @@ export function initCli(): CliOptions {
     // LLM provider options
     .option('-p, --provider <provider>', 'LLM provider (e.g., anthropic, openai)', process.env.LLM_PROVIDER || 'anthropic')
     .option('-m, --model <model>', 'LLM model (e.g., claude-3-5-sonnet-latest)', process.env.LLM_MODEL || 'claude-3-5-sonnet-latest')
-    .option('-k, --api-key <key>', 'LLM provider API key', process.env.LLM_PROVIDER_API_KEY)
+    .option('-k, --api-key <key>', 'LLM provider API key')
     .parse(process.argv)
 
   const options = program.opts()
+
+  // Determine API key based on provider
+  let apiKey = options.apiKey || getProviderApiKey(options.provider)
+  if (!apiKey) {
+    console.error(`Missing API key. Please set the 
+    ${options.provider === 'openai'
+      ? '"OPENAI_API_KEY"'
+      : '"ANTHROPIC_API_KEY"'} environment variable or use the --api-key option.`)
+    process.exit(1)
+  }
 
   return {
     dir: path.resolve(process.cwd(), options.dir),
@@ -74,7 +85,7 @@ export function initCli(): CliOptions {
     format: options.format,
     provider: options.provider,
     model: options.model,
-    apiKey: options.apiKey,
+    apiKey: apiKey,
     routes: options.routes,
     info: {
       title: options.title,

@@ -6,7 +6,7 @@ async function basicExample() {
   const documentry = new Documentry({
     provider: 'openai',
     model: 'gpt-4o',
-    apiKey: process.env.LLM_PROVIDER_API_KEY!,
+    apiKey: process.env.OPENAI_API_KEY!,
     dir: './src/examples/api',
     outputFile: './src/examples/outputs/advanced',
     format: 'yaml',

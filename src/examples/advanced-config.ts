@@ -6,7 +6,7 @@ async function advancedExample() {
   const documentry = new Documentry({
     provider: 'anthropic',
     model: 'claude-3-7-sonnet-latest',
-    apiKey: process.env.LLM_PROVIDER_API_KEY!,
+    apiKey: process.env.ANTHROPIC_API_KEY!,
     dir: './src/examples/api',
     routes: ['/users', '/products', '/orders/*'],
     outputFile: './src/examples/outputs/advanced',
