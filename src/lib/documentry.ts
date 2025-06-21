@@ -8,9 +8,11 @@ import { AVAILABLE_LLM_PROVIDERS, createLLMService, getDefaultModel } from '@/li
 import { processAllRoutes } from '@/lib/generator/process-routes'
 import { OpenAPI } from '@/lib/schemas'
 import { generateSwaggerUIPage } from '@/lib/generator/swagger/ui-page'
+import { createLogger } from '@/lib/utils/logger'
 
 export class Documentry {
   private options: CliOptions
+  private logger = createLogger()
 
   constructor(options: CliOptions) {
     this.options = options
@@ -26,45 +28,57 @@ export class Documentry {
 
       assert(format === 'yaml' || format === 'json' || format === 'html', 'Invalid format. Available formats: "yaml" | "json" | "html"')
 
-      console.log('> Starting OpenAPI spec generation\n', {
+      this.logger.header('Running Documentry...')
+      this.logger.info('Configuration:', {
         provider,
         model: model || getDefaultModel(provider),
         format
-      }, '\n')
+      })
+      this.logger.separator()
 
       const outputPath = `${outputFile}.${format === 'html' ? 'html' : format}`
       let errorCount = 0
-
 
       // Find all route.ts files
       const routeFiles = await glob('**/route.ts', { cwd: dir })
 
       if (routeFiles.length === 0) {
-        console.log(`No route.ts files found in directory "${dir}".`)
+        this.logger.warn(`No route.ts files found in directory "${dir}"`)
         return
       }
 
       // Initialize LLM service
       const llmService = await createLLMService(provider, apiKey, model)
 
-      const startTime = Date.now()
+      this.logger.startTimer()
       const openAPIPaths = await processAllRoutes({
         dir,
         routeFiles,
         llmService,
         provider,
-        routes
+        routes,
+        logger: this.logger
       })
 
       if (!openAPIPaths || Object.keys(openAPIPaths).length === 0) {
         return
       }
 
-      const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2)
-      console.info('\nOpenAPI spec generation completed in', elapsedTime, 'seconds')
+      this.logger.separator()
+      this.logger.endTimer('Generation completed')
+      this.logger.separator()
+
+      this.logger.log('Routes processed:\n')
+      const tableRows = Object.entries(openAPIPaths)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([path, methods]) => ({
+          path,
+          methods: Object.keys(methods).join(', ')
+        }))
+      this.logger.table(['path', 'methods'], tableRows)
 
       if (errorCount === routeFiles.length) {
-        console.error('\x1b[31m✗\x1b[0m Failed to generate OpenAPI specs. Please check the logs for details.')
+        this.logger.error('Failed to generate OpenAPI specs. Please check the logs for details.')
         return
       }
 
@@ -95,14 +109,12 @@ export class Documentry {
         fs.writeFileSync(outputPath, htmlContent)
       }
 
-      // TODO: implement some console-styling library (e.g., chalk)
       if (errorCount > 0) {
-        console.error('\x1b[31m✗\x1b[0m Failed to generate OpenAPI specs for', errorCount, 'route(s). ' +
-          'Please check the logs for details since the OpenAPI spec may be incomplete.')
+        this.logger.error(`Failed to generate OpenAPI specs for ${errorCount} route(s). Please check the logs for details since the OpenAPI spec may be incomplete.`)
       } else {
-        // log success message with underline
-        console.log('\n', '\x1b[32m✓ SUCCESS!\x1b[0m', 'OpenAPI specs generated at', `\x1b[4m${outputPath}\x1b[0m`)
-
+        this.logger.separator()
+        this.logger.success('SUCCESS! OpenAPI specs generated at')
+        this.logger.highlight(outputPath)
       }
     } catch (error: any) {
       throw new Error(`Error generating OpenAPI specs: ${error.message}`)

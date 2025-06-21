@@ -3,6 +3,7 @@ import fs from 'fs'
 import { convertRouteToPath } from '@/lib/parsers'
 import { Paths } from '@/lib/schemas'
 import { LLMService } from '@/lib/services/providers/llm-provider'
+import { Logger } from '@/lib/utils/logger'
 
 const MAX_CONCURRENCY = 5
 
@@ -19,24 +20,27 @@ const extractHttpMethods = (content: string): string[] => {
 /**
  * Process all route files in the specified directory with concurrency control
  */
-export const processAllRoutes = async ({ dir, routeFiles, llmService, provider, routes }: {
+export const processAllRoutes = async ({ dir, routeFiles, llmService, provider, routes, logger }: {
   dir: string,
   routeFiles: string[],
   llmService: LLMService,
   provider: string,
   routes?: string[],
+  logger: Logger,
 }): Promise<Paths> => {
   const results: Paths = {}
+  let completedCount = 0
 
   // Filter route files based on routes parameter
   const filteredRouteFiles = routeFiles.filter(routeFile => shouldProcessRoute(routeFile, routes))
 
   if (filteredRouteFiles.length === 0) {
-    console.error('\x1b[31m✗\x1b[0m No matching route files found for routes', routes)
+    logger.error('No matching route files found for routes', routes)
     return results
   }
 
-  console.log('→ Routes found:', filteredRouteFiles.length)
+  logger.info(`Processing ${filteredRouteFiles.length} files:`)
+  logger.separator()
 
   const processFile = async (routeFile: string, index: number) => {
     const fullPath = path.join(dir, routeFile)
@@ -45,12 +49,11 @@ export const processAllRoutes = async ({ dir, routeFiles, llmService, provider, 
     const httpMethods = extractHttpMethods(fileContent)
 
     if (httpMethods.length === 0) {
-      console.warn(`No HTTP methods found for ${apiPath}`)
+      logger.warn(`No HTTP methods found for ${apiPath}`)
+      completedCount++
+      logger.progress(completedCount, filteredRouteFiles.length, 'files processed')
       return
     }
-
-    console.log('\n> Processing file', index + 1)
-    console.log({ path: apiPath, methods: httpMethods.join(', ') })
 
     // Process all HTTP methods for this route in parallel
     const methodResults = await Promise.all(
@@ -59,7 +62,7 @@ export const processAllRoutes = async ({ dir, routeFiles, llmService, provider, 
         try {
           return { method, result: await llmService.generatePathItem(fullPath, method, route) }
         } catch (error: any) {
-          console.error(`Error processing "${route}" with ${provider}:`, error.message, '\n')
+          logger.error(`Error processing "${route}" with ${provider}`, error.message)
           return null
         }
       })
@@ -71,7 +74,14 @@ export const processAllRoutes = async ({ dir, routeFiles, llmService, provider, 
         results[apiPath] = { ...results[apiPath], ...item.result }
       }
     })
+
+    // Update progress after completing this route
+    completedCount++
+    logger.progress(completedCount, filteredRouteFiles.length, 'routes processed')
   }
+
+  // Show initial progress
+  logger.progress(0, filteredRouteFiles.length, 'starting...')
 
   // Process files with controlled concurrency
   for (let i = 0; i < filteredRouteFiles.length; i += MAX_CONCURRENCY) {
