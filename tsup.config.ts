@@ -13,7 +13,7 @@ export default defineConfig([
     treeshake: true,
     minify: true,
     outDir: 'dist/lib',
-    publicDir: 'src/lib/generator/swagger/templates',
+    publicDir: 'src/lib/generator/swagger',
     esbuildOptions(options) {
       options.alias = {
         '@': path.resolve(__dirname, './src')

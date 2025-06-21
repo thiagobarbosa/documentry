@@ -13,7 +13,7 @@ export const generateSwaggerUIPage = (openAPISpec: OpenAPI): string => {
 
   // Read template files
   const htmlTemplate = fs.readFileSync(path.join(distDir, 'lib/swagger-ui.html'), 'utf-8')
-  const cssContent = fs.readFileSync(path.join(distDir, 'lib/swagger-ui-dark.css'), 'utf-8')
+  const cssContent = fs.readFileSync(path.join(distDir, 'lib/swagger-ui.css'), 'utf-8')
 
   // Replace placeholders in HTML template
   let html = htmlTemplate
@@ -22,7 +22,7 @@ export const generateSwaggerUIPage = (openAPISpec: OpenAPI): string => {
 
   // Inline the CSS content instead of external link
   html = html.replace(
-    '<link href="./swagger-ui-dark.css" rel="stylesheet" type="text/css" />',
+    '<link href="swagger-ui.css" rel="stylesheet" type="text/css" />',
     `<style>\n${cssContent}\n</style>`
   )
 
