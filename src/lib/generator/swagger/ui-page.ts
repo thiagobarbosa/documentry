@@ -1,4 +1,4 @@
-import { OpenAPI } from '@/lib'
+import { OpenAPI } from '@/lib/schemas'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import fs from 'fs'
@@ -12,8 +12,8 @@ export const generateSwaggerUIPage = (openAPISpec: OpenAPI): string => {
   const distDir = path.dirname(__filename)
 
   // Read template files
-  const htmlTemplate = fs.readFileSync(path.join(distDir, 'swagger/templates/swagger-ui.html'), 'utf-8')
-  const cssContent = fs.readFileSync(path.join(distDir, 'swagger/templates/swagger-ui-dark.css'), 'utf-8')
+  const htmlTemplate = fs.readFileSync(path.join(distDir, 'lib/swagger-ui.html'), 'utf-8')
+  const cssContent = fs.readFileSync(path.join(distDir, 'lib/swagger-ui-dark.css'), 'utf-8')
 
   // Replace placeholders in HTML template
   let html = htmlTemplate
