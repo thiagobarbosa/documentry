@@ -1,14 +1,15 @@
-import { generateOpenAPISpecs } from 'documentry'
+import { Documentry } from 'documentry'
+import 'dotenv/config'
 
 // Advanced configuration example
 async function advancedExample() {
-  await generateOpenAPISpecs({
+  const documentry = new Documentry({
     provider: 'anthropic',
     model: 'claude-3-7-sonnet-latest',
     apiKey: process.env.LLM_PROVIDER_API_KEY!,
-    dir: './src/app/api',
-    routes: ['/user', '/products/*', '/orders'],
-    outputFile: './docs/api-spec',
+    dir: './src/examples/api',
+    routes: ['/users', '/products', '/orders/*'],
+    outputFile: './src/examples/outputs/advanced',
     format: 'html',
     info: {
       title: 'E-commerce API',
@@ -30,6 +31,8 @@ async function advancedExample() {
       }
     ]
   })
+
+  await documentry.generate()
 }
 
 advancedExample().catch(console.error)

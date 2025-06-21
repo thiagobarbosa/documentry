@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import yaml from 'js-yaml'
 import { glob } from 'glob'
-import { generateOpenAPISpecs } from '../../../src/lib/generator'
+import { generateOpenAPISpecs } from '../../../src/lib'
 import { CliOptions } from '../../../src/lib/types'
 import { processAllRoutes } from '../../../src/lib/generator/process-routes'
 // Test utilities and mocks

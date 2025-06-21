@@ -25,43 +25,36 @@ npm install documentry --save-dev
 
 ## Usage
 
-### CLI
-
-You can use `Documentry` directly from the command line:
+### Command line
 
 ```bash
-# Generate YAML documentation (default)
-npx documentry --provider anthropic
-
-# Generate JSON documentation
-npx documentry --provider anthropic --format json
-
-# Generate interactive HTML documentation (from Swagger UI)
-npx documentry --provider anthropic --format html
-
-# Control which routes to process
-npx documentry --provider anthropic --routes "/user,/products/*"
+npx documentry 
 ```
 
-*NOTE: Your API key can also be set using a `LLM_PROVIDER_API_KEY` environment variable or passing it directly in the
-command line with `--api-key your-api-key`.*
-
-### API
-
-You can also use the library programmatically in your project:
+### Programmatic API
 
 ```typescript
-import { generateOpenAPISpecs } from 'documentry'
+import { Documentry } from 'documentry'
+
+// Create a new Documentry instance
+const documentry = new Documentry()
 
 // Generate OpenAPI specs
-await generateOpenAPISpecs({
+await documentry.generate()
+```
+
+<details>
+<summary>Full usage example</summary>
+
+```typescript
+const documentry = new Documentry({
+  provider: 'anthropic',
+  model: 'claude-3-5-sonnet-latest',
+  apiKey: process.env.LLM_PROVIDER_API_KEY,
   dir: './app/api',
   routes: ['/user', '/products/*'],
   outputFile: './docs/openapi',
   format: 'html', // 'yaml', 'json', or 'html'
-  provider: 'anthropic',
-  model: 'claude-3-5-sonnet-latest',
-  apiKey: 'your-api-key',
   info: {
     title: 'My API',
     version: '1.0.0',
@@ -78,9 +71,28 @@ await generateOpenAPISpecs({
     }
   ]
 })
+
+await documentry.generate()
+```
+
+</details>
+
+
+More examples can be found in the [examples](src/examples) directory.
+
+## Environment variables
+
+You can configure the LLM settings with an `.env` file:
+
+```bash
+export LLM_PROVIDER=your-llm-provider # openai or anthropic; defaults to anthropic
+export LLM_MODEL=your-llm-model # defaults to claude-3-5-sonnet-latest
+export LLM_PROVIDER_API_KEY=your-api-key
 ```
 
 ## Configuration Options
+
+The CLI usage supports the following options:
 
 | Flag                              | Description                                                                   | Default                                     |
 |-----------------------------------|-------------------------------------------------------------------------------|---------------------------------------------|

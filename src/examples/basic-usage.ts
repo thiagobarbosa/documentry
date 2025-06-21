@@ -1,13 +1,14 @@
-import { generateOpenAPISpecs } from 'documentry'
+import { Documentry } from 'documentry'
+import 'dotenv/config'
 
 // Basic usage example
 async function basicExample() {
-  await generateOpenAPISpecs({
+  const documentry = new Documentry({
     provider: 'openai',
     model: 'gpt-4o',
     apiKey: process.env.LLM_PROVIDER_API_KEY!,
-    dir: './app/api',
-    outputFile: './docs/openapi',
+    dir: './src/examples/api',
+    outputFile: './src/examples/outputs/advanced',
     format: 'yaml',
     info: {
       title: 'My API',
@@ -15,6 +16,7 @@ async function basicExample() {
       description: 'My API description'
     }
   })
+  await documentry.generate()
 }
 
 basicExample().catch(console.error)
