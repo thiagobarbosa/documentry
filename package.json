@@ -1,7 +1,7 @@
 {
   "name": "documentry",
   "description": "AI-powered OpenAPI documentation generator for Next.js applications.",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
