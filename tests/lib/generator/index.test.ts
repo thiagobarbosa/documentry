@@ -2,9 +2,8 @@ import fs from 'fs'
 import path from 'path'
 import yaml from 'js-yaml'
 import { glob } from 'glob'
-import { generateOpenAPISpecs } from '../../../src/lib'
-import { CliOptions } from '../../../src/lib/types'
-import { processAllRoutes } from '../../../src/lib/generator/process-routes'
+import { CliOptions, generateOpenAPISpecs } from '@/lib'
+import { processAllRoutes } from '@/lib/generator/process-routes'
 // Test utilities and mocks
 const mockCliOptions: CliOptions = {
   dir: '/test/api',
@@ -252,9 +251,9 @@ describe('generateOpenAPISpecs', () => {
       expect(htmlContent).toContain('<title>Test API - API Documentation</title>')
 
       // Check for Swagger UI assets
-      expect(htmlContent).toContain('swagger-ui-dist@5.10.5/swagger-ui.css')
-      expect(htmlContent).toContain('swagger-ui-dist@5.10.5/swagger-ui-bundle.js')
-      expect(htmlContent).toContain('swagger-ui-dist@5.10.5/swagger-ui-standalone-preset.js')
+      expect(htmlContent).toContain('swagger-ui-dist@5.11.0/swagger-ui.css')
+      expect(htmlContent).toContain('swagger-ui-dist@5.11.0/swagger-ui-bundle.js')
+      expect(htmlContent).toContain('swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js')
 
       // Check for Swagger UI configuration
       expect(htmlContent).toContain('SwaggerUIBundle(')

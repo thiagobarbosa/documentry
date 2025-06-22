@@ -1,6 +1,3 @@
-// Library exports
-export * from '@/lib'
-
 // CLI entry point check
 const isCli = process.argv[1]?.endsWith('documentry') ||
   process.argv[1]?.includes('node_modules/.bin/documentry') ||

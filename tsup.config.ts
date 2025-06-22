@@ -2,34 +2,14 @@ import { defineConfig } from 'tsup'
 import path from 'path'
 
 export default defineConfig([
-  // Main library build  
+  // Core library build
   {
-    entry: ['src/lib/index.ts'],
+    entry: { 'lib/index': 'src/lib/index.ts' },
     format: ['esm'],
     dts: false,
     splitting: false,
     sourcemap: false,
     clean: true,
-    treeshake: true,
-    minify: true,
-    outDir: 'dist/lib',
-    publicDir: 'src/lib/generator/templates',
-    esbuildOptions(options) {
-      options.alias = {
-        '@': path.resolve(__dirname, './src')
-      }
-      options.define = {
-        'process.env.NODE_ENV': '"production"'
-      }
-    },
-  },
-  // CLI build
-  {
-    entry: ['src/index.ts'],
-    format: ['esm'],
-    dts: false,
-    splitting: false,
-    sourcemap: false,
     treeshake: true,
     minify: true,
     outDir: 'dist',
@@ -40,9 +20,33 @@ export default defineConfig([
       options.define = {
         'process.env.NODE_ENV': '"production"'
       }
+      options.target = 'es2020'
+      options.mangleProps = /^_/
+    },
+  },
+  // CLI build
+  {
+    entry: ['src/index.ts'],
+    format: ['esm'],
+    dts: false,
+    splitting: false,
+    sourcemap: false,
+    clean: false,
+    treeshake: true,
+    minify: true,
+    outDir: 'dist',
+    esbuildOptions(options) {
+      options.alias = {
+        '@': path.resolve(__dirname, './src')
+      }
+      options.define = {
+        'process.env.NODE_ENV': '"production"'
+      }
+      options.target = 'es2020'
+      options.mangleProps = /^_/
     },
     banner: {
       js: '#!/usr/bin/env node',
     },
-  }
+  },
 ])

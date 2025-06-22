@@ -52,7 +52,6 @@
     "glob": "^10.4.5",
     "js-yaml": "^4.1.0",
     "openai": "^4.93.0",
-    "openapi3-ts": "^4.4.0",
     "zod": "^3.24.3",
     "zod-to-json-schema": "^3.24.5"
   },
