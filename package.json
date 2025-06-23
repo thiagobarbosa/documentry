@@ -1,7 +1,7 @@
 {
   "name": "documentry",
   "description": "AI-powered OpenAPI documentation generator for Next.js applications.",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "type": "module",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
@@ -11,12 +11,14 @@
   "exports": {
     ".": {
       "import": "./dist/lib/index.js",
-      "types": "./dist/lib/index.d.ts"
+      "require": "./dist/lib/index.d.ts"
     },
     "./cli": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+      "require": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json",
+    "./dist/*": "./dist/*"
   },
   "scripts": {
     "build": "tsup",

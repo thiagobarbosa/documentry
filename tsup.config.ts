@@ -6,7 +6,7 @@ export default defineConfig([
   {
     entry: { 'lib/index': 'src/lib/index.ts' },
     format: ['esm'],
-    dts: false,
+    dts: true,
     splitting: false,
     sourcemap: false,
     clean: true,
@@ -28,7 +28,7 @@ export default defineConfig([
   {
     entry: ['src/index.ts'],
     format: ['esm'],
-    dts: false,
+    dts: true,
     splitting: false,
     sourcemap: false,
     clean: false,
